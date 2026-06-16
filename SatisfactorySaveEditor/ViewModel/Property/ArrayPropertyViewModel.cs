@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.Input;
 using SatisfactorySaveEditor.Util;
 using SatisfactorySaveParser.PropertyTypes;
 
@@ -22,7 +22,7 @@ namespace SatisfactorySaveEditor.ViewModel.Property
         public bool IsExpanded
         {
             get => isExpanded;
-            set { Set(() => IsExpanded, ref isExpanded, value); }
+            set { SetProperty(ref isExpanded, value, nameof(IsExpanded)); }
         }
 
         public override string ShortName => $"Array ({AddViewModel.FromStringType(Type)})";

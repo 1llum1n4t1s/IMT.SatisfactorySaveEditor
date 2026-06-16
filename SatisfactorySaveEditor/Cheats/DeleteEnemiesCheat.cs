@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel.Property;
 using SatisfactorySaveEditor.ViewModel.Struct;
 using SatisfactorySaveParser;
@@ -86,7 +87,7 @@ namespace SatisfactorySaveEditor.Cheats
             var hostPlayerModel = rootItem.FindChild("Char_Player.Char_Player_C", false);
             if (hostPlayerModel == null || hostPlayerModel.Items.Count < 1)
             {
-                MessageBox.Show("This save does not contain a host player or it is corrupt.", "Cannot find host player", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoHostPlayer_Body, "Cannot find host player", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             var player = (SaveEntityModel)hostPlayerModel.Items[0];
@@ -188,7 +189,7 @@ namespace SatisfactorySaveEditor.Cheats
             var animalSpawners = rootItem.FindChild("BP_CreatureSpawner.BP_CreatureSpawner_C", false);
             if (animalSpawners == null)
             {
-                MessageBox.Show("This save does not contain animals or it is corrupt.", "Cannot find animals", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoAnimals_Body, Resources.MsgNoAnimals_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
@@ -196,7 +197,7 @@ namespace SatisfactorySaveEditor.Cheats
             var hostPlayerModel = rootItem.FindChild("Char_Player.Char_Player_C", false);
             if (hostPlayerModel == null || hostPlayerModel.Items.Count < 1)
             {
-                MessageBox.Show("This save does not contain a host player or it is corrupt.", "Cannot find host player", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoHostPlayer_Body, "Cannot find host player", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             Vector3 playerPosition = ((SaveEntityModel)hostPlayerModel.Items[0]).Position;
@@ -224,7 +225,7 @@ namespace SatisfactorySaveEditor.Cheats
             var enemies = rootItem.FindChild("Creature", false).FindChild("Enemy", false);
             rootItem.Remove(enemies);
 
-            if (MessageBox.Show($"Deleted all spawned enemies, and all unspawned creatures (enemy & friendly). Would you like 3 tamed Lizzard Doggos as a compensation?", "Success", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show(Resources.MsgEnemiesDeleted_Body, "Success", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 for (int i = 0; i < 3; i++)
                     AddDoggo(rootItem, saveGame);

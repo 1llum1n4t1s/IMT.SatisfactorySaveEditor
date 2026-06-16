@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel.Property;
 
 using SatisfactorySaveParser;
@@ -22,7 +23,7 @@ namespace SatisfactorySaveEditor.Cheats
 
             var numAdditionalSlots = gameState.FindOrCreateField<BoolPropertyViewModel>("mCheatNoPower");
             numAdditionalSlots.Value = !numAdditionalSlots.Value;
-            MessageBox.Show((numAdditionalSlots.Value ? "Enabled no power cheat.\nNote that buildings still need to be connected to an electrical network to function" : "Disabled no power cheat"), "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show((numAdditionalSlots.Value ? Resources.MsgNoPowerEnabled_Body : Resources.MsgNoPowerDisabled_Body), "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
             return true;
         }

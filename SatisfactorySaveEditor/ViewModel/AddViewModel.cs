@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Windows;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SatisfactorySaveEditor.Model;
 using SatisfactorySaveEditor.Util;
 using SatisfactorySaveParser.PropertyTypes;
 
 namespace SatisfactorySaveEditor.ViewModel
 {
-    public class AddViewModel : ViewModelBase
+    public class AddViewModel : ObservableObject
     {
         public enum AddTypeEnum
         {
@@ -47,8 +47,8 @@ namespace SatisfactorySaveEditor.ViewModel
             get => name;
             set
             {
-                Set(() => Name, ref name, value);
-                RaisePropertyChanged(() => CanConfirm);
+                SetProperty(ref name, value, nameof(Name));
+                OnPropertyChanged(nameof(CanConfirm));
             }
         }
         public AddTypeEnum Type
@@ -56,9 +56,9 @@ namespace SatisfactorySaveEditor.ViewModel
             get => type;
             set
             {
-                Set(() => Type, ref type, value);
-                RaisePropertyChanged(() => IsArray);
-                RaisePropertyChanged(() => CanConfirm);
+                SetProperty(ref type, value, nameof(Type));
+                OnPropertyChanged(nameof(IsArray));
+                OnPropertyChanged(nameof(CanConfirm));
             }
         }
         public AddTypeEnum ArrayType
@@ -66,8 +66,8 @@ namespace SatisfactorySaveEditor.ViewModel
             get => arrayType;
             set
             {
-                Set(() => ArrayType, ref arrayType, value);
-                RaisePropertyChanged(() => CanConfirm);
+                SetProperty(ref arrayType, value, nameof(ArrayType));
+                OnPropertyChanged(nameof(CanConfirm));
             }
         }
 

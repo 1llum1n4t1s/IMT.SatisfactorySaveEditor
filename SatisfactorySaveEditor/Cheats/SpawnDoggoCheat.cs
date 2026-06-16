@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.View;
 using SatisfactorySaveEditor.ViewModel;
 using SatisfactorySaveParser;
@@ -35,7 +36,7 @@ namespace SatisfactorySaveEditor.Cheats
                 Owner = Application.Current.MainWindow
             };
             var cvm = (StringPromptViewModel)dialog.DataContext;
-            cvm.WindowTitle = "Enter doggo count";
+            cvm.WindowTitle = Resources.PromptDoggoCount_Title;
             cvm.PromptMessage = "Count (integer):";
             cvm.ValueChosen = "1";
             cvm.OldValueMessage = "";
@@ -57,7 +58,7 @@ namespace SatisfactorySaveEditor.Cheats
 
                     if (pastSuccess)
                     {
-                        MessageBox.Show("Spawned " + counter + " doggo(s) at the host player.");
+                        MessageBox.Show(string.Format(Resources.MsgDoggoSpawned_Body, counter));
                         return true;
                     }
                     else
@@ -68,7 +69,7 @@ namespace SatisfactorySaveEditor.Cheats
                 }
                 else
                 {
-                    MessageBox.Show("You can't spawn " + doggocount + " doggos.");
+                    MessageBox.Show(string.Format(Resources.MsgDoggoCannotSpawn_Body, doggocount));
                     return false;
                 }
             }

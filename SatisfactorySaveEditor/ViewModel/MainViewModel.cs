@@ -1,11 +1,11 @@
 using System;
-using GalaSoft.MvvmLight;
+using CommunityToolkit.Mvvm.ComponentModel;
 using SatisfactorySaveEditor.Model;
 using SatisfactorySaveParser;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Globalization;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.Input;
 using SatisfactorySaveEditor.Util;
 using System.Windows;
 using Microsoft.Win32;
@@ -20,12 +20,13 @@ using SatisfactorySaveEditor.View;
 using System.IO.Compression;
 using System.Windows.Threading;
 using AsyncAwaitBestPractices.MVVM;
-using NLog;
+using SuperLightLogger;
 using System.ComponentModel;
+using SatisfactorySaveEditor.Properties;
 
 namespace SatisfactorySaveEditor.ViewModel
 {
-    public class MainViewModel : ViewModelBase, IDropTarget
+    public class MainViewModel : ObservableObject, IDropTarget
     {
         private SatisfactorySave saveGame;
         private SaveObjectModel rootItem;
@@ -33,7 +34,7 @@ namespace SatisfactorySaveEditor.ViewModel
         private string searchText;
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         private ObservableCollection<SaveObjectModel> rootItems = new ObservableCollection<SaveObjectModel>();
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetCurrentClassLogger();
 
         private bool isBusyInternal = false;
         public bool IsBusy
@@ -44,20 +45,20 @@ namespace SatisfactorySaveEditor.ViewModel
             }
             set
             {
-                Set(() => IsBusy, ref isBusyInternal, value);
+                SetProperty(ref isBusyInternal, value, nameof(IsBusy));
             }
         }
 
         public ObservableCollection<SaveObjectModel> RootItem
         {
             get => rootItems;
-            private set { Set(() => RootItem, ref rootItems, value); }
+            private set { SetProperty(ref rootItems, value, nameof(RootItem)); }
         }
 
         public SaveObjectModel SelectedItem
         {
             get => selectedItem;
-            set { Set(() => SelectedItem, ref selectedItem, value); }
+            set { SetProperty(ref selectedItem, value, nameof(SelectedItem)); }
         }
 
         public string FileName
@@ -74,7 +75,7 @@ namespace SatisfactorySaveEditor.ViewModel
             get => searchText;
             set
             {
-                Set(() => SearchText, ref searchText, value);
+                SetProperty(ref searchText, value, nameof(SearchText));
 
                 tokenSource.Cancel();
                 tokenSource = new CancellationTokenSource();
@@ -198,7 +199,7 @@ namespace SatisfactorySaveEditor.ViewModel
 
             var latestVersion = await UpdateChecker.GetLatestReleaseInfo();
 
-            if (latestVersion.IsNewer())
+            if (latestVersion != null && latestVersion.IsNewer())
             {
                 UpdateWindow window = new UpdateWindow
                 {
@@ -210,7 +211,7 @@ namespace SatisfactorySaveEditor.ViewModel
             }
             else if (manual)
             {
-                MessageBox.Show("You are already using the latest version.", "Update", MessageBoxButton.OK);
+                MessageBox.Show(Resources.MsgAlreadyLatestVersion_Body, Resources.MsgUpdate_Title, MessageBoxButton.OK);
             }
         }
 
@@ -231,7 +232,7 @@ namespace SatisfactorySaveEditor.ViewModel
         private void Delete(SaveObjectModel model)
         {
             rootItem.Remove(model);
-            RaisePropertyChanged(() => RootItem);
+            OnPropertyChanged(nameof(RootItem));
         }
 
         /// <summary>
@@ -281,7 +282,7 @@ namespace SatisfactorySaveEditor.ViewModel
             {
                 SaveFileDialog dialog = new SaveFileDialog
                 {
-                    Filter = "Satisfactory save file|*.sav",
+                    Filter = Resources.FileFilterSaveGame,
                     InitialDirectory = Path.GetDirectoryName(saveGame.FileName),
                     DefaultExt = ".sav",
                     CheckFileExists = false,
@@ -301,7 +302,7 @@ namespace SatisfactorySaveEditor.ViewModel
                     await Task.Run(() => saveGame.Save(dialog.FileName));
                     this.IsBusy = false;
                     HasUnsavedChanges = false;
-                    RaisePropertyChanged(() => FileName);
+                    OnPropertyChanged(nameof(FileName));
                     AddRecentFileEntry(dialog.FileName);
                 }
             }
@@ -358,7 +359,7 @@ namespace SatisfactorySaveEditor.ViewModel
             catch (Exception ex)
             {
                 //should never be reached, but hopefully any users that encounter an error here will report it 
-                MessageBox.Show("An error occurred while creating a backup. The error message will appear when you press 'Ok'.\nPlease tell Goz3rr, Robb, or virusek20 the contents of the error, or report it on the Github Issues page with your log file and save file attached.");
+                MessageBox.Show(Resources.MsgBackupError_Body);
                 log.Error(ex);
                 throw;
             }
@@ -370,7 +371,7 @@ namespace SatisfactorySaveEditor.ViewModel
             }
 
             if (manual)
-                MessageBox.Show("Backup created. Find it in your save file folder.");
+                MessageBox.Show(Resources.MsgBackupCreated_Body);
         }
 
         /// <summary>
@@ -380,7 +381,7 @@ namespace SatisfactorySaveEditor.ViewModel
         /// <returns>True if rootItem contains the EntitiyName, false otherwise.</returns>
         private bool CanJump(string target)
         {
-            return rootItem.FindChild(target, false) != null;
+            return rootItem?.FindChild(target, false) != null;
         }
 
         /// <summary>
@@ -388,7 +389,7 @@ namespace SatisfactorySaveEditor.ViewModel
         /// </summary>
         private void Help_ViewGithub()
         {
-            System.Diagnostics.Process.Start("https://github.com/Goz3rr/SatisfactorySaveEditor#help");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/Goz3rr/SatisfactorySaveEditor#help") { UseShellExecute = true });
         }
 
         /// <summary>
@@ -396,7 +397,7 @@ namespace SatisfactorySaveEditor.ViewModel
         /// </summary>
         private void Help_ReportIssue()
         {
-            System.Diagnostics.Process.Start("https://github.com/Goz3rr/SatisfactorySaveEditor/issues");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/Goz3rr/SatisfactorySaveEditor/issues") { UseShellExecute = true });
         }
 
         /// <summary>
@@ -404,8 +405,8 @@ namespace SatisfactorySaveEditor.ViewModel
         /// </summary>
         private void Help_RequestHelpDiscord()
         {
-            MessageBox.Show("You are now being redirected to the Satisfactory Modding discord server. Please request help in the #savegame-edits channel.");
-            System.Diagnostics.Process.Start("https://bit.ly/SatisfactoryModding"); //discord invite for Satisfactory Modding server. Contact BaineGames#7333 if it breaks
+            MessageBox.Show(Resources.MsgDiscordRedirect_Body);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://bit.ly/SatisfactoryModding") { UseShellExecute = true }); //discord invite for Satisfactory Modding server. Contact BaineGames#7333 if it breaks
         }
 
         /// <summary>
@@ -413,8 +414,8 @@ namespace SatisfactorySaveEditor.ViewModel
         /// </summary>
         private void Help_FicsitAppGuide()
         {
-            MessageBox.Show("You are now being redirected to the ficsit.app mod and tool repository to view a guide.");
-            System.Diagnostics.Process.Start("https://ficsit.app/guide/Z8h6z2CczH43c");
+            MessageBox.Show(Resources.MsgFicsitRedirect_Body);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://ficsit.app/guide/Z8h6z2CczH43c") { UseShellExecute = true });
         }
 
 
@@ -424,7 +425,7 @@ namespace SatisfactorySaveEditor.ViewModel
         private void About()
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            MessageBox.Show($"Satisfactory save editor{Environment.NewLine}{version}", "About");
+            MessageBox.Show($"{Resources.MsgAboutEditorName_Body}{Environment.NewLine}{version}", Resources.MsgAbout_Title);
         }
 
         /// <summary>
@@ -443,7 +444,7 @@ namespace SatisfactorySaveEditor.ViewModel
 
             if (HasUnsavedChanges)
             {
-                MessageBoxResult result = MessageBox.Show("You have unsaved changes. Abandon changes by opening another file?\n\nNote: Changes made in the data text fields are not yet tracked as saved/unsaved but are still saved.", "Unsaved Changes", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                MessageBoxResult result = MessageBox.Show(Resources.MsgUnsavedChangesOpen_Body, Resources.MsgUnsavedChanges_Title, MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.No)
                 {
                     return;
@@ -453,7 +454,7 @@ namespace SatisfactorySaveEditor.ViewModel
             //TODO: swap this over to calling the save method instead
             OpenFileDialog dialog = new OpenFileDialog
             {
-                Filter = "Satisfactory save file|*.sav"
+                Filter = Resources.FileFilterSaveGame
             };
 
             var newPath = Environment.ExpandEnvironmentVariables(@"%localappdata%\FactoryGame\Saved\SaveGames\");
@@ -478,7 +479,7 @@ namespace SatisfactorySaveEditor.ViewModel
         {
             if (HasUnsavedChanges)
             {
-                MessageBoxResult result = MessageBox.Show("You have unsaved changes. Close and abandon changes?\n\nNote: Changes made in the data text fields are not yet tracked as saved/unsaved but are still saved.", "Unsaved Changes", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                MessageBoxResult result = MessageBox.Show(Resources.MsgUnsavedChangesClose_Body, Resources.MsgUnsavedChanges_Title, MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                 {
                     Application.Current.Shutdown();
@@ -518,10 +519,10 @@ namespace SatisfactorySaveEditor.ViewModel
                 Owner = Application.Current.MainWindow
             };
             var cvm = (StringPromptViewModel)dialog.DataContext;
-            cvm.WindowTitle = "Jump to Tag";
-            cvm.PromptMessage = "Tag name:";
+            cvm.WindowTitle = Resources.PromptJumpToTag_Title;
+            cvm.PromptMessage = Resources.PromptJumpToTag_Caption;
             cvm.ValueChosen = "";
-            cvm.OldValueMessage = "Obtain via Right Click > Copy name\nExample:\nPersistent_Level:PersistentLevel.Char_Player_C_0.inventory";
+            cvm.OldValueMessage = Resources.PromptJumpToTag_Detail;
             dialog.ShowDialog();
 
             destination = cvm.ValueChosen;
@@ -530,7 +531,7 @@ namespace SatisfactorySaveEditor.ViewModel
                 if (CanJump(destination))
                     Jump(destination);
                 else
-                    MessageBox.Show("Failed to jump to tag:\n" + destination);
+                    MessageBox.Show(Resources.MsgJumpToTagFailed_Body + destination);
         }
 
         /// <summary>
@@ -566,7 +567,7 @@ namespace SatisfactorySaveEditor.ViewModel
             {
                 if (LastFiles != null && LastFiles.Contains(path)) //if the save file that failed to open was on the last found list, remove it. this should only occur when people move save files around and leave the editor open.
                 {
-                    MessageBox.Show("That file could no longer be found on the disk.\nIt has been removed from the recent files list.", "File not present", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(Resources.MsgRecentFileMissing_Body, Resources.MsgFileNotPresent_Title, MessageBoxButton.OK, MessageBoxImage.Warning);
                     log.Info($"Removing save file {path} from recent saves list since it wasn't found on disk");
                     Properties.Settings.Default.LastSaves.Remove(path);
                     Application.Current.Dispatcher.Invoke(() =>
@@ -578,7 +579,7 @@ namespace SatisfactorySaveEditor.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occurred while opening the file:\n{ex.Message}\n\nCheck the logs for more details.\n\nIf this issue persists, please report it via \"Help > Report an Issue\", and attach the log file and save file you were trying to open.", "Error opening file", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(Resources.MsgOpenFileError_Body, ex.Message), Resources.MsgErrorOpeningFile_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 log.Error(ex);
                 return;
             }
@@ -588,6 +589,11 @@ namespace SatisfactorySaveEditor.ViewModel
                 //manually raise these for the AsyncCommand library to pick up on it (ask virusek20 or Robb)
                 SaveCommand.RaiseCanExecuteChanged();
                 ManualBackupCommand.RaiseCanExecuteChanged();
+                //CommunityToolkit の RelayCommand は CommandManager 連動が無いため、セーブ読み込み後に明示的に再評価する
+                JumpMenuCommand.NotifyCanExecuteChanged();
+                JumpCommand.NotifyCanExecuteChanged();
+                DeleteCommand.NotifyCanExecuteChanged();
+                CheatCommand.NotifyCanExecuteChanged();
             });
             
             rootItem = new SaveRootModel(saveGame.Header);
@@ -607,8 +613,8 @@ namespace SatisfactorySaveEditor.ViewModel
                 item.IsExpanded = true;
             }
 
-            RaisePropertyChanged(() => RootItem);
-            RaisePropertyChanged(() => FileName);
+            OnPropertyChanged(nameof(RootItem));
+            OnPropertyChanged(nameof(FileName));
 
             AddRecentFileEntry(path);
         }

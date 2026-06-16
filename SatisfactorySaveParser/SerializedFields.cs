@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using SuperLightLogger;
 using SatisfactorySaveParser.PropertyTypes;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ namespace SatisfactorySaveParser
 {
     public class SerializedFields : List<SerializedProperty>
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         ///     Used to handle edge cases where objects have 0 bytes of data, and we don't want to generate a "None" string either

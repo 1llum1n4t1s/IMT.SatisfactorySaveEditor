@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel;
 using SatisfactorySaveEditor.ViewModel.Property;
 
@@ -57,7 +58,7 @@ namespace SatisfactorySaveEditor.Cheats
             var tradingPostBuilt = tutorialManager.FindField<BoolPropertyViewModel>("mTradingPostBuilt");
             if (tradingPostBuilt == null)
             {
-                MessageBox.Show("You should build a hub before attempting to unlock all research.", "No hub found", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgBuildHubFirst_Body, Resources.MsgNoHubFound_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
@@ -123,7 +124,7 @@ namespace SatisfactorySaveEditor.Cheats
                 f.Type = "EGamePhase";
             });
 
-            MessageBox.Show("Research successfully unlocked.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Resources.MsgResearchUnlocked_Body, Resources.MsgSuccess_Title, MessageBoxButton.OK, MessageBoxImage.Information);
             return true;
         }
 

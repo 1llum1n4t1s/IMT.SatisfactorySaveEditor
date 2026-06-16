@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Windows;
 using SatisfactorySaveEditor.Model;
 
 namespace SatisfactorySaveEditor.ViewModel
 {
-    public class FillViewModel : ViewModelBase
+    public class FillViewModel : ObservableObject
     {
         private ResourceType selectedItem;
         public ResourceType SelectedItem
@@ -14,8 +14,8 @@ namespace SatisfactorySaveEditor.ViewModel
             get => selectedItem;
             set
             {
-                Set(() => SelectedItem, ref selectedItem, value);
-                RaisePropertyChanged(nameof(CanConfirm));
+                SetProperty(ref selectedItem, value, nameof(SelectedItem));
+                OnPropertyChanged(nameof(CanConfirm));
             }
         }
 

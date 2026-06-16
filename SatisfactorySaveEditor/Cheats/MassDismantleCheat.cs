@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel.Property;
 using SatisfactorySaveParser;
 using SatisfactorySaveParser.PropertyTypes;
@@ -186,7 +187,7 @@ namespace SatisfactorySaveEditor.Cheats
             BuildPolygon();
             if (polygon.Length < 2)
             {
-                MessageBox.Show("At least 2 points needed to mass dismantle", "Could not mass dismantle", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgMassDismantleNeed2Points_Body, Resources.MsgMassDismantleFailed_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             ArrayProperty inventory = new ArrayProperty("mInventoryStacks")
@@ -211,10 +212,10 @@ namespace SatisfactorySaveEditor.Cheats
             catch (NullReferenceException) { }
             if(countFactory + countBuilding + countCrate == 0)
             {
-                MessageBox.Show("Nothing was dismantled. Make sure the coordinates are correct and in clockwise order.", "Mass dismantle", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgMassDismantleNothing_Body, Resources.MsgMassDismantle_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            MessageBoxResult result = MessageBox.Show($"Dismantled {countFactory} factory buildings, {countBuilding} foundations and {countCrate} crates. Drop the items (including items in storages) in a single crate?", "Dismantled", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            MessageBoxResult result = MessageBox.Show(string.Format(Resources.MsgMassDismantleResult_Body, countFactory, countBuilding, countCrate), Resources.MsgDismantled_Title, MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
                 CreateCrateEntityFromInventory(rootItem, inventory, saveGame.Header.BuildVersion);

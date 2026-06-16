@@ -1,4 +1,5 @@
-﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.View;
 using SatisfactorySaveEditor.ViewModel;
 using SatisfactorySaveEditor.ViewModel.Property;
@@ -19,7 +20,7 @@ namespace SatisfactorySaveEditor.Cheats
             var mapManager = rootItem.FindChild("Persistent_Level:PersistentLevel.MapManager", false);
             if (mapManager == null)
             {
-                MessageBox.Show("This save does not contain a MapManager.\nThis means that the loaded save is probably corrupt. Aborting.", "Cannot find MapManager", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoMapManager_Body, Resources.MsgNoMapManager_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
@@ -28,12 +29,12 @@ namespace SatisfactorySaveEditor.Cheats
 
             if (!(fogOfWarRawData is ArrayPropertyViewModel))
             {
-                MessageBox.Show("FogOfWarRawData is of wrong type.\nThis means that the loaded save is probably corrupt. Aborting.", "Wrong property type", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgFogOfWarWrongType_Body, Resources.MsgWrongPropertyType_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
             if (fogOfWarRawData.Elements.Count != 1048576)
-                MessageBox.Show($"Expected 1048576 fog of war elements to be present, but there were actually {fogOfWarRawData.Elements.Count}.\nThis does not necessarily mean that the process will fail. Please report this error on the Github Issues page regardless.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(string.Format(Resources.MsgFogOfWarUnexpectedCount_Body, fogOfWarRawData.Elements.Count), Resources.MsgWarning_Title, MessageBoxButton.OK, MessageBoxImage.Warning);
 
             int mapRevealThreshold = 0;
 
@@ -42,10 +43,10 @@ namespace SatisfactorySaveEditor.Cheats
                 Owner = Application.Current.MainWindow
             };
             var cvm = (StringPromptViewModel)dialog.DataContext;
-            cvm.WindowTitle = "Enter map reveal threshold";
-            cvm.PromptMessage = "Enter a number between 0 and 255 (integer):";
+            cvm.WindowTitle = Resources.PromptRevealMap_Title;
+            cvm.PromptMessage = Resources.PromptRevealMap_Caption;
             cvm.ValueChosen = "255";
-            cvm.OldValueMessage = "Sets the reveal state of every map region to the value you choose.\n255 is fully explored\n0 is entirely unexplored";
+            cvm.OldValueMessage = Resources.PromptRevealMap_Detail;
             dialog.ShowDialog();
 
             try
@@ -60,7 +61,7 @@ namespace SatisfactorySaveEditor.Cheats
                 }
                 else
                 {
-                    MessageBox.Show("You must enter a number between 0 and 255.");
+                    MessageBox.Show(Resources.MsgRevealMapRange_Body);
                     return false;
                 }
             }
@@ -68,12 +69,12 @@ namespace SatisfactorySaveEditor.Cheats
             {
                 if (!(cvm.ValueChosen == "cancel"))
                 {
-                    MessageBox.Show($"Could not parse: {cvm.ValueChosen}");
+                    MessageBox.Show(string.Format(Resources.MsgCouldNotParse_Body, cvm.ValueChosen));
                 }
                 return false;
             }
 
-            MessageBox.Show("Map data uncovered. Remember to enable the map as well if desired.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Resources.MsgMapDataUncovered_Body, Resources.MsgSuccess_Title, MessageBoxButton.OK, MessageBoxImage.Information);
             return true;
         }
     }

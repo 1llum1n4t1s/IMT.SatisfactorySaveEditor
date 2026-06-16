@@ -3,7 +3,8 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
-using GalaSoft.MvvmLight.Command;
+using CommunityToolkit.Mvvm.Input;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.View;
 using SatisfactorySaveEditor.ViewModel;
 using SatisfactorySaveEditor.ViewModel.Property;
@@ -20,7 +21,7 @@ namespace SatisfactorySaveEditor.Model
         public string ParentEntityName
         {
             get => parentEntityName;
-            set { Set(() => ParentEntityName, ref parentEntityName, value); }
+            set { SetProperty(ref parentEntityName, value, nameof(ParentEntityName)); }
         }
 
         public RelayCommand FillInventoryCommand => new RelayCommand(FillInventory);
@@ -94,7 +95,7 @@ namespace SatisfactorySaveEditor.Model
                 numItems.Value = 0;
             }
             ApplyChanges();
-            MessageBox.Show($"Inventory for storage {Title} emptied", "Inventory Emptied");
+            MessageBox.Show(string.Format(Resources.MsgInventoryEmptied_Body, Title), Resources.MsgInventoryEmptied_Title);
         }
     }
 }

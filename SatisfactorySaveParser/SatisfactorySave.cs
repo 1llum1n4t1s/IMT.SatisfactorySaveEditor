@@ -1,7 +1,7 @@
-﻿using NLog;
+﻿using SuperLightLogger;
 using SatisfactorySaveParser.Save;
 using SatisfactorySaveParser.Structures;
-using SatisfactorySaveParser.ZLib;
+using System.IO.Compression;
 
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace SatisfactorySaveParser
     /// </summary>
     public class SatisfactorySave
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         ///     Path to save on disk
@@ -80,7 +80,7 @@ namespace SatisfactorySaveParser
                             Trace.Assert(subChunk.UncompressedSize == summary.UncompressedSize);
 
                             var startPosition = stream.Position;
-                            using (var zStream = new ZLibStream(stream, CompressionMode.Decompress))
+                            using (var zStream = new ZLibStream(stream, CompressionMode.Decompress, leaveOpen: true))
                             {
                                 zStream.CopyTo(buffer);
                             }
@@ -208,7 +208,7 @@ namespace SatisfactorySaveParser
                             {
                                 var remaining = (int)Math.Min(ChunkInfo.ChunkSize, buffer.Length - (ChunkInfo.ChunkSize * i));
 
-                                using (var zStream = new ZLibStream(zBuffer, CompressionMode.Compress, CompressionLevel.Level6))
+                                using (var zStream = new ZLibStream(zBuffer, CompressionLevel.Optimal, leaveOpen: true))
                                 {
                                     var tmpBuf = new byte[remaining];
                                     buffer.Read(tmpBuf, 0, remaining);

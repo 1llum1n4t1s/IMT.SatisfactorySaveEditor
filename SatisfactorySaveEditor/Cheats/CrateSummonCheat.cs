@@ -1,10 +1,10 @@
-﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel.Property;
 using SatisfactorySaveParser;
 using SatisfactorySaveParser.PropertyTypes;
 using SatisfactorySaveParser.PropertyTypes.Structs;
 using SatisfactorySaveParser.Structures;
-using System.Numerics;
 using System.Windows;
 
 namespace SatisfactorySaveEditor.Cheats
@@ -18,14 +18,14 @@ namespace SatisfactorySaveEditor.Cheats
             var cratesList = rootItem.FindChild("BP_Crate.BP_Crate_C", false);
             if (cratesList == null)
             {
-                MessageBox.Show("This save does not appear to have any crates.\nCrates appear on death and when your inventory is too full to hold items during deconstruction.", "Cannot find any Crates", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Resources.MsgNoCrates_Body, Resources.MsgNoCrates_Title, MessageBoxButton.OK, MessageBoxImage.Information);
                 return false;
             }
 
             var hostPlayerModel = rootItem.FindChild("Char_Player.Char_Player_C", false);
             if (hostPlayerModel == null || hostPlayerModel.Items.Count < 1)
             {
-                MessageBox.Show("This save does not contain a host player or it is corrupt.\nTry loading and re-saving the save from within the game.", "Cannot find host player", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoHostPlayerSimple_Body, Resources.MsgNoHostPlayer_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             var playerEntityModel = (SaveEntityModel)hostPlayerModel.Items[0];
@@ -38,7 +38,7 @@ namespace SatisfactorySaveEditor.Cheats
             float playerZ = playerEntityModel.Position.Z - crateSpacingOffset;
 
             int counter = 0;
-            
+
             foreach (SaveObjectModel thisCrate in cratesList.DescendantSelfViewModel)
             {
                 //MessageBox.Show($"Modifying crate {counter}: {thisCrate.ToString()}");
@@ -47,7 +47,7 @@ namespace SatisfactorySaveEditor.Cheats
                 ((SaveEntityModel)thisCrate).Position.Z = playerZ + (crateSpacingOffset * (counter % stackHeight));
                 counter++;
             }
-            MessageBox.Show($"Successfully moved {counter} crates to the host player. They are stacked in piles of 5 slightly east of you.");
+            MessageBox.Show(string.Format(Resources.MsgCratesMoved_Body, counter));
             return true;
         }
     }

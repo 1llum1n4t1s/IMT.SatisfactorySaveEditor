@@ -1,8 +1,8 @@
-﻿using SatisfactorySaveParser.Structures;
+﻿using Res = SatisfactorySaveEditor.Properties.Resources;
+using SatisfactorySaveParser.Structures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,11 +27,11 @@ namespace SatisfactorySaveEditor.Cheats
             this.isZWindow = isZWindow;
             if(isZWindow)
             {
-                xLabel.Content = "minimum Z";
-                yLabel.Content = "maximum Z";
+                xHeader.Header = Res.MassDismantleMinZ_Caption;
+                yHeader.Header = Res.MassDismantleMaxZ_Caption;
                 xCoordinate.Placeholder = "-inf";
                 yCoordinate.Placeholder = "+inf";
-                ((WrapPanel)grid.Children[4]).Children.Remove(nextButton);
+                nextButton.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -62,11 +62,11 @@ namespace SatisfactorySaveEditor.Cheats
                     DialogResult = true;
                 }
                 else
-                    MessageBox.Show("Enter coordinates");
+                    MessageBox.Show(Res.MsgEnterCoordinates_Title);
             }
             catch (FormatException)
             {
-                MessageBox.Show("Coordinate format: 123456");
+                MessageBox.Show(Res.MsgCoordinateFormat_Body);
             }
         }
 
@@ -101,13 +101,13 @@ namespace SatisfactorySaveEditor.Cheats
             }
             catch (FormatException)
             {
-                MessageBox.Show("Coordinate format: 123456");
+                MessageBox.Show(Res.MsgCoordinateFormat_Body);
             }
         }
 
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://ficsit.app/guide/1Nk4oKqhpMhgN");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://ficsit.app/guide/1Nk4oKqhpMhgN") { UseShellExecute = true });
         }
     }
 
@@ -132,10 +132,12 @@ namespace SatisfactorySaveEditor.Cheats
             }
         }
         public bool IsPlaceholder { get; set; }
-        public Brush PlaceholderColor { get; set; } = Brushes.Gray;
+        public Brush PlaceholderColor { get; set; }
 
         public PlaceholderTextBox() : base()
         {
+            // テーマ準拠の控えめ文字色（DynamicResource ではなく現在値を解決して保持する）
+            PlaceholderColor = (TryFindResource("Brush.FG3") as Brush) ?? Brushes.Gray;
             TextChanged += HandlePlaceholder;
             SelectionChanged += HandleCaretPosition;
             HandlePlaceholder(this, null);
@@ -170,7 +172,8 @@ namespace SatisfactorySaveEditor.Cheats
                 else
                 {
                     Text = Text.Substring(textChange.Offset, textChange.AddedLength);
-                    Foreground = Brushes.Black;
+                    // テーマ既定の前景色（ダーク/ライト両対応）へ戻す
+                    ClearValue(ForegroundProperty);
                     CaretIndex = textChange.AddedLength;
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.View;
 using SatisfactorySaveEditor.ViewModel;
 using SatisfactorySaveEditor.ViewModel.Property;
@@ -36,8 +37,8 @@ namespace SatisfactorySaveEditor.Cheats
                 Owner = Application.Current.MainWindow
             };
             var cvm = (StringPromptViewModel)dialog.DataContext;
-            cvm.WindowTitle = "Enter quantity of each item to spawn";
-            cvm.PromptMessage = "Count (integer):";
+            cvm.WindowTitle = Resources.PromptEverythingBox_Title;
+            cvm.PromptMessage = Resources.PromptCountInteger_Caption;
             cvm.ValueChosen = "500";
             cvm.OldValueMessage = "";
             dialog.ShowDialog();
@@ -48,7 +49,7 @@ namespace SatisfactorySaveEditor.Cheats
 
                 if (itemStackQuantity <= 0)
                 {
-                    MessageBox.Show("The quantity you entered is invalid.");
+                    MessageBox.Show(Resources.MsgQuantityInvalid_Body);
                     return false;
                 }
             }
@@ -56,7 +57,7 @@ namespace SatisfactorySaveEditor.Cheats
             {
                 if (!(cvm.ValueChosen == "cancel"))
                 {
-                    MessageBox.Show("Could not parse: " + cvm.ValueChosen);
+                    MessageBox.Show(string.Format(Resources.MsgCouldNotParse_Body, cvm.ValueChosen));
                 }
                 return false;
             }
@@ -104,7 +105,7 @@ namespace SatisfactorySaveEditor.Cheats
             MassDismantleCheat.CreateCrateEntityFromInventory(rootItem, inventory, saveGame.Header.BuildVersion);
 
             //MessageBox.Show("Player name " + playerEntityModel.Title);
-            MessageBox.Show($"Crate created.\nNote that normally unstackable items will visually display as being stacked to 1. Use Ctrl+Click to transfer items out of the crate without deleting part of the stack.\n\nSkipped the following items marked as radioactive:\n\n{skipped}", $"Processed {resourceStrings.Count} resource paths");
+            MessageBox.Show(string.Format(Resources.MsgEverythingBoxCreated_Body, skipped), string.Format(Resources.MsgEverythingBoxProcessed_Title, resourceStrings.Count));
 
             //Ask the player if they'd like the be equipped with a hazmat suit and filters since the box will be radioactive
             /*MessageBoxResult result = MessageBox.Show("A crate with all resources has been generated at your feet. This includes radioactive items. Would you like a Hazmat suit and filters? They will replace your current equipment and first inventory item.", $"Processed {resourceStrings.Count} resource paths", MessageBoxButton.YesNo, MessageBoxImage.Question);

@@ -1,4 +1,5 @@
-﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel.Property;
 
 using SatisfactorySaveParser;
@@ -16,13 +17,13 @@ namespace SatisfactorySaveEditor.Cheats
             var gameState = rootItem.FindChild("Persistent_Level:PersistentLevel.BP_GameState_C_*", false);
             if (gameState == null)
             {
-                MessageBox.Show("This save does not contain a GameState.\nThis means that the loaded save is probably corrupt. Aborting.", "Cannot find GameState", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoGameState_Body, Resources.MsgNoGameState_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
             var numAdditionalSlots = gameState.FindOrCreateField<BoolPropertyViewModel>("mCheatNoCost");
             numAdditionalSlots.Value = !numAdditionalSlots.Value;
-            MessageBox.Show($"{(numAdditionalSlots.Value ? "Enabled" : "Disabled")} no building cost cheat", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(numAdditionalSlots.Value ? Resources.MsgNoCostEnabled_Body : Resources.MsgNoCostDisabled_Body, Resources.MsgSuccess_Title, MessageBoxButton.OK, MessageBoxImage.Information);
 
             return true;
         }

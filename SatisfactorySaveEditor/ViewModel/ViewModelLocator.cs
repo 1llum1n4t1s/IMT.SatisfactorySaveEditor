@@ -1,37 +1,37 @@
 using System;
-using CommonServiceLocator;
-using GalaSoft.MvvmLight.Ioc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SatisfactorySaveEditor.ViewModel
 {
     public class ViewModelLocator
     {
-        public ViewModelLocator()
+        private static readonly IServiceProvider services = BuildServiceProvider();
+
+        private static IServiceProvider BuildServiceProvider()
         {
-            ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
+            var collection = new ServiceCollection();
 
-            SimpleIoc.Default.Register<MainViewModel>();
+            // メインウィンドウは単一インスタンス
+            collection.AddSingleton<MainViewModel>();
 
-            SimpleIoc.Default.Register<AddViewModel>();
-            SimpleIoc.Default.Register<CheatInventoryViewModel>();
-            SimpleIoc.Default.Register<StringPromptViewModel>();
-            SimpleIoc.Default.Register<PreferencesWindowViewModel>();
-            SimpleIoc.Default.Register<FillViewModel>();
-            SimpleIoc.Default.Register<UnlockResearchWindowViewModel>();
+            // これらのウィンドウは永続データを持たないため、参照のたびに新しいインスタンスを生成する
+            collection.AddTransient<AddViewModel>();
+            collection.AddTransient<CheatInventoryViewModel>();
+            collection.AddTransient<StringPromptViewModel>();
+            collection.AddTransient<PreferencesWindowViewModel>();
+            collection.AddTransient<FillViewModel>();
+            collection.AddTransient<UnlockResearchWindowViewModel>();
+
+            return collection.BuildServiceProvider();
         }
 
-        public MainViewModel MainViewModel => ServiceLocator.Current.GetInstance<MainViewModel>();
+        public MainViewModel MainViewModel => services.GetRequiredService<MainViewModel>();
 
-        // The new GUID makes sure we get a fresh instance every time, these windows don't have any persistent data
-        public AddViewModel AddViewModel => ServiceLocator.Current.GetInstance<AddViewModel>(Guid.NewGuid().ToString());
-        public CheatInventoryViewModel CheatInventoryViewModel => ServiceLocator.Current.GetInstance<CheatInventoryViewModel>(Guid.NewGuid().ToString());
-        public StringPromptViewModel StringPromptViewModel => ServiceLocator.Current.GetInstance<StringPromptViewModel>(Guid.NewGuid().ToString());
-        public PreferencesWindowViewModel PreferencesWindowViewModel => ServiceLocator.Current.GetInstance<PreferencesWindowViewModel>(Guid.NewGuid().ToString());
-        public FillViewModel FillViewModel => ServiceLocator.Current.GetInstance<FillViewModel>(Guid.NewGuid().ToString());
-        public UnlockResearchWindowViewModel UnlockResearchWindowViewModel => ServiceLocator.Current.GetInstance<UnlockResearchWindowViewModel>(Guid.NewGuid().ToString());
-
-        public static void Cleanup()
-        {
-        }
+        public AddViewModel AddViewModel => services.GetRequiredService<AddViewModel>();
+        public CheatInventoryViewModel CheatInventoryViewModel => services.GetRequiredService<CheatInventoryViewModel>();
+        public StringPromptViewModel StringPromptViewModel => services.GetRequiredService<StringPromptViewModel>();
+        public PreferencesWindowViewModel PreferencesWindowViewModel => services.GetRequiredService<PreferencesWindowViewModel>();
+        public FillViewModel FillViewModel => services.GetRequiredService<FillViewModel>();
+        public UnlockResearchWindowViewModel UnlockResearchWindowViewModel => services.GetRequiredService<UnlockResearchWindowViewModel>();
     }
 }

@@ -1,10 +1,10 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel.Property;
 using SatisfactorySaveParser;
 using SatisfactorySaveParser.PropertyTypes;
 using SatisfactorySaveParser.PropertyTypes.Structs;
 using SatisfactorySaveParser.Structures;
-using System.Numerics;
 using System.Windows;
 
 namespace SatisfactorySaveEditor.Cheats
@@ -25,7 +25,7 @@ namespace SatisfactorySaveEditor.Cheats
             var players = rootItem.FindChild("Char_Player.Char_Player_C", false);
             if (players == null)
             {
-                MessageBox.Show("This save does not contain a Player.\nThis means that the loaded save is probably corrupt. Aborting.", "Cannot find Player", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoPlayer_Body, Resources.MsgNoPlayer_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             int currentStorageID = 0;
@@ -66,7 +66,7 @@ namespace SatisfactorySaveEditor.Cheats
                 }
                 rootItem.Remove(player);
                 rootItem.Remove(inventoryState);
-                MessageBox.Show($"Killed {player.Title}.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(string.Format(Resources.MsgKilledPlayers_Body, player.Title), Resources.MsgSuccess_Title, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             return true;
         }

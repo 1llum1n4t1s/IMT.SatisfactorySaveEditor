@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using SuperLightLogger;
 using SatisfactorySaveParser.Exceptions;
 using System.IO;
 
@@ -10,7 +10,7 @@ namespace SatisfactorySaveParser.Save
     /// </summary>
     public class FSaveHeader
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         ///     Save version number

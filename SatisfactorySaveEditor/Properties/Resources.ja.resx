@@ -17,680 +17,680 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="MenuFile" xml:space="preserve">
-    <value>_File</value>
+    <value>ファイル(_F)</value>
   </data>
   <data name="MenuOpen" xml:space="preserve">
-    <value>_Open...</value>
+    <value>開く(_O)...</value>
   </data>
   <data name="MenuOpenRecent" xml:space="preserve">
-    <value>Open recent</value>
+    <value>最近使ったファイル</value>
   </data>
   <data name="MenuSave" xml:space="preserve">
-    <value>_Save</value>
+    <value>保存(_S)</value>
   </data>
   <data name="MenuSaveAs" xml:space="preserve">
-    <value>_Save as...</value>
+    <value>名前を付けて保存(_S)...</value>
   </data>
   <data name="MenuCreateBackup" xml:space="preserve">
-    <value>_Create backup</value>
+    <value>バックアップを作成(_C)</value>
   </data>
   <data name="MenuJumpToTag" xml:space="preserve">
-    <value>Jump to tag...</value>
+    <value>タグへジャンプ...</value>
   </data>
   <data name="MenuPreferences" xml:space="preserve">
-    <value>Preferences</value>
+    <value>環境設定</value>
   </data>
   <data name="MenuExit" xml:space="preserve">
-    <value>_Exit</value>
+    <value>終了(_X)</value>
   </data>
   <data name="MenuCheats" xml:space="preserve">
-    <value>_Cheats</value>
+    <value>チート(_C)</value>
   </data>
   <data name="MenuHelp" xml:space="preserve">
-    <value>_Help</value>
+    <value>ヘルプ(_H)</value>
   </data>
   <data name="MenuViewGuidesFicsit" xml:space="preserve">
-    <value>View guides on ficsit.app</value>
+    <value>ficsit.app でガイドを見る</value>
   </data>
   <data name="MenuRequestHelpDiscord" xml:space="preserve">
-    <value>Request help on Discord</value>
+    <value>Discord でヘルプを依頼</value>
   </data>
   <data name="MenuViewOnGitHub" xml:space="preserve">
-    <value>View on GitHub</value>
+    <value>GitHub で表示</value>
   </data>
   <data name="MenuReportIssue" xml:space="preserve">
-    <value>Report an Issue</value>
+    <value>問題を報告</value>
   </data>
   <data name="MenuCheckForUpdates" xml:space="preserve">
-    <value>Check for updates</value>
+    <value>更新を確認</value>
   </data>
   <data name="MenuAbout" xml:space="preserve">
-    <value>About</value>
+    <value>バージョン情報</value>
   </data>
   <data name="MainSearchPlaceholder" xml:space="preserve">
-    <value>Search Save Entity / Component names</value>
+    <value>セーブ エンティティ / コンポーネント名を検索</value>
   </data>
   <data name="MainSearchClearTooltip" xml:space="preserve">
-    <value>Clear search</value>
+    <value>検索をクリア</value>
   </data>
   <data name="CommonCopyName" xml:space="preserve">
-    <value>Copy name</value>
+    <value>名前をコピー</value>
   </data>
   <data name="CommonCopyPath" xml:space="preserve">
-    <value>Copy path</value>
+    <value>パスをコピー</value>
   </data>
   <data name="CommonFillInventory" xml:space="preserve">
-    <value>Fill Inventory</value>
+    <value>インベントリを満たす</value>
   </data>
   <data name="CommonEmptyInventory" xml:space="preserve">
-    <value>Empty Inventory</value>
+    <value>インベントリを空にする</value>
   </data>
   <data name="CommonDelete" xml:space="preserve">
-    <value>Delete</value>
+    <value>削除</value>
   </data>
   <data name="CommonAdd" xml:space="preserve">
-    <value>Add</value>
+    <value>追加</value>
   </data>
   <data name="CommonEntity" xml:space="preserve">
-    <value>Entity</value>
+    <value>エンティティ</value>
   </data>
   <data name="CommonComponent" xml:space="preserve">
-    <value>Component</value>
+    <value>コンポーネント</value>
   </data>
   <data name="MainEntityHeader" xml:space="preserve">
-    <value>Selected save entity</value>
+    <value>選択中のセーブ エンティティ</value>
   </data>
   <data name="MainEntityName" xml:space="preserve">
-    <value>Entity name</value>
+    <value>エンティティ名</value>
   </data>
   <data name="CommonRoot" xml:space="preserve">
-    <value>Root</value>
+    <value>ルート</value>
   </data>
   <data name="MainNeedTransform" xml:space="preserve">
-    <value>Need transform</value>
+    <value>トランスフォーム必須</value>
   </data>
   <data name="MainWasPlacedInLevel" xml:space="preserve">
-    <value>Was placed in level</value>
+    <value>レベルに配置済み</value>
   </data>
   <data name="MainPosition" xml:space="preserve">
-    <value>Position</value>
+    <value>位置</value>
   </data>
   <data name="MainRotation" xml:space="preserve">
-    <value>Rotation</value>
+    <value>回転</value>
   </data>
   <data name="MainScale" xml:space="preserve">
-    <value>Scale</value>
+    <value>スケール</value>
   </data>
   <data name="MainParentObjectName" xml:space="preserve">
-    <value>Parent object name</value>
+    <value>親オブジェクト名</value>
   </data>
   <data name="MainParentObjectRoot" xml:space="preserve">
-    <value>Parent object root</value>
+    <value>親オブジェクト ルート</value>
   </data>
   <data name="MainComponentHeader" xml:space="preserve">
-    <value>Selected save component</value>
+    <value>選択中のセーブ コンポーネント</value>
   </data>
   <data name="MainComponentName" xml:space="preserve">
-    <value>Component name</value>
+    <value>コンポーネント名</value>
   </data>
   <data name="MainParentEntityName" xml:space="preserve">
-    <value>Parent entity name</value>
+    <value>親エンティティ名</value>
   </data>
   <data name="MainSaveMetadataTitle" xml:space="preserve">
-    <value>Save metadata</value>
+    <value>セーブ メタデータ</value>
   </data>
   <data name="MainSaveMetadataSubtitle" xml:space="preserve">
-    <value>Header information for the loaded save file</value>
+    <value>読み込み中のセーブファイルのヘッダー情報</value>
   </data>
   <data name="MainHeaderVersion" xml:space="preserve">
-    <value>Header version</value>
+    <value>ヘッダー バージョン</value>
   </data>
   <data name="MainSaveVersion" xml:space="preserve">
-    <value>Save version</value>
+    <value>セーブ バージョン</value>
   </data>
   <data name="MainBuildVersion" xml:space="preserve">
-    <value>Build version</value>
+    <value>ビルド バージョン</value>
   </data>
   <data name="MainMapName" xml:space="preserve">
-    <value>Map name</value>
+    <value>マップ名</value>
   </data>
   <data name="MainMapOptions" xml:space="preserve">
-    <value>Map options</value>
+    <value>マップ オプション</value>
   </data>
   <data name="MainSessionName" xml:space="preserve">
-    <value>Session name</value>
+    <value>セッション名</value>
   </data>
   <data name="MainSessionVisibility" xml:space="preserve">
-    <value>Session visibility</value>
+    <value>セッションの公開設定</value>
   </data>
   <data name="MainSaveCreationTime" xml:space="preserve">
-    <value>Save creation time</value>
+    <value>セーブ作成日時</value>
   </data>
   <data name="MainPlayDuration" xml:space="preserve">
-    <value>Play duration</value>
+    <value>プレイ時間</value>
   </data>
   <data name="CommonPleaseWait" xml:space="preserve">
-    <value>Please wait...</value>
+    <value>お待ちください...</value>
   </data>
   <data name="MainLoadingSaveFile" xml:space="preserve">
-    <value>Loading save file</value>
+    <value>セーブファイルを読み込み中</value>
   </data>
   <data name="PrefsTitle" xml:space="preserve">
-    <value>Preferences</value>
+    <value>環境設定</value>
   </data>
   <data name="PrefsSubtitle" xml:space="preserve">
-    <value>Editor behaviour and update preferences</value>
+    <value>エディターの動作と更新の設定</value>
   </data>
   <data name="PrefsGeneralHeader" xml:space="preserve">
-    <value>General</value>
+    <value>全般</value>
   </data>
   <data name="PrefsCheckUpdatesOnLaunch" xml:space="preserve">
-    <value>Check for updates automatically on launch</value>
+    <value>起動時に自動で更新を確認する</value>
   </data>
   <data name="PrefsCheckUpdatesOnLaunchDesc" xml:space="preserve">
-    <value>When enabled, the editor will quietly check the GitHub releases page each time you start it.</value>
+    <value>有効にすると、起動時に GitHub のリリースページを静かに確認します。</value>
   </data>
   <data name="PrefsBackupBeforeWriting" xml:space="preserve">
-    <value>Back up save files before writing</value>
+    <value>保存前にセーブファイルをバックアップする</value>
   </data>
   <data name="PrefsBackupDesc" xml:space="preserve">
-    <value>A compressed .SSEbkup.zip copy is placed next to your save file on every save.</value>
+    <value>保存のたびに圧縮された .SSEbkup.zip をセーブファイルの隣に作成します。</value>
   </data>
   <data name="PrefsLanguageHeader" xml:space="preserve">
-    <value>Language</value>
+    <value>言語</value>
   </data>
   <data name="PrefsLanguageDesc" xml:space="preserve">
-    <value>The change applies immediately and is saved with Apply or OK.</value>
+    <value>変更は即座に反映され、適用 / OK で保存されます。</value>
   </data>
   <data name="ButtonCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>キャンセル</value>
   </data>
   <data name="ButtonApply" xml:space="preserve">
-    <value>Apply</value>
+    <value>適用</value>
   </data>
   <data name="ButtonOK" xml:space="preserve">
     <value>OK</value>
   </data>
   <data name="AddWindowTitle" xml:space="preserve">
-    <value>Add Property</value>
+    <value>プロパティを追加</value>
   </data>
   <data name="AddWindowHeader" xml:space="preserve">
-    <value>Add property</value>
+    <value>プロパティを追加</value>
   </data>
   <data name="AddWindowSubtitle" xml:space="preserve">
-    <value>Create a new property on the selected entity / component</value>
+    <value>選択中のエンティティ / コンポーネントに新しいプロパティを作成します</value>
   </data>
   <data name="AddWindowType" xml:space="preserve">
-    <value>Type</value>
+    <value>型</value>
   </data>
   <data name="AddWindowArrayElementType" xml:space="preserve">
-    <value>Array element type</value>
+    <value>配列要素の型</value>
   </data>
   <data name="CommonName" xml:space="preserve">
-    <value>Name</value>
+    <value>名前</value>
   </data>
   <data name="FillWindowTitle" xml:space="preserve">
-    <value>Fill Inventory</value>
+    <value>インベントリを満たす</value>
   </data>
   <data name="FillWindowHeader" xml:space="preserve">
-    <value>Fill inventory</value>
+    <value>インベントリを満たす</value>
   </data>
   <data name="FillWindowSubtitle" xml:space="preserve">
-    <value>Stack every slot with the chosen item</value>
+    <value>選択したアイテムですべてのスロットを埋めます</value>
   </data>
   <data name="FillWindowItemType" xml:space="preserve">
-    <value>Item type</value>
+    <value>アイテムの種類</value>
   </data>
   <data name="FillWindowQuantityPerStack" xml:space="preserve">
-    <value>Quantity per stack</value>
+    <value>スタックあたりの数量</value>
   </data>
   <data name="ButtonFill" xml:space="preserve">
-    <value>Fill</value>
+    <value>満たす</value>
   </data>
   <data name="CommonValue" xml:space="preserve">
-    <value>Value</value>
+    <value>値</value>
   </data>
   <data name="UpdateWindowTitle" xml:space="preserve">
-    <value>Update</value>
+    <value>更新</value>
   </data>
   <data name="UpdateWindowHeader" xml:space="preserve">
-    <value>Update available</value>
+    <value>更新があります</value>
   </data>
   <data name="UpdateWindowSubtitle" xml:space="preserve">
-    <value>A newer release is available on GitHub</value>
+    <value>GitHub に新しいリリースが公開されています</value>
   </data>
   <data name="ButtonDisableAutoCheck" xml:space="preserve">
-    <value>Disable auto-check</value>
+    <value>自動確認を無効化</value>
   </data>
   <data name="ButtonRemindLater" xml:space="preserve">
-    <value>Remind me later</value>
+    <value>後で通知</value>
   </data>
   <data name="ButtonOpenReleasePage" xml:space="preserve">
-    <value>Open release page</value>
+    <value>リリースページを開く</value>
   </data>
   <data name="CheatInventoryTitle" xml:space="preserve">
-    <value>Set slot count</value>
+    <value>スロット数を設定</value>
   </data>
   <data name="CheatInventoryHeader" xml:space="preserve">
-    <value>Inventory slots</value>
+    <value>インベントリ スロット</value>
   </data>
   <data name="CheatInventoryCurrentlyPrefix" xml:space="preserve">
-    <value>Currently </value>
+    <value>現在 </value>
   </data>
   <data name="CheatInventorySlotsSuffix" xml:space="preserve">
-    <value> slots</value>
+    <value> スロット</value>
   </data>
   <data name="CheatInventoryNewCount" xml:space="preserve">
-    <value>New slot count</value>
+    <value>新しいスロット数</value>
   </data>
   <data name="UnlockResearchTitle" xml:space="preserve">
-    <value>Unlock Research</value>
+    <value>研究を解放</value>
   </data>
   <data name="UnlockResearchHeader" xml:space="preserve">
-    <value>Unlock research</value>
+    <value>研究を解放</value>
   </data>
   <data name="UnlockResearchSubtitle" xml:space="preserve">
-    <value>Move schematics between Available and Unlocked lists</value>
+    <value>利用可能リストと解放済みリストの間で設計図を移動します</value>
   </data>
   <data name="UnlockResearchAvailable" xml:space="preserve">
-    <value>Available</value>
+    <value>利用可能</value>
   </data>
   <data name="UnlockResearchUnlock" xml:space="preserve">
-    <value>_Unlock &gt;</value>
+    <value>解放(_U) &gt;</value>
   </data>
   <data name="UnlockResearchRemove" xml:space="preserve">
-    <value>&lt; _Remove</value>
+    <value>&lt; 削除(_R)</value>
   </data>
   <data name="UnlockResearchUnlockAll" xml:space="preserve">
-    <value>Unlock all &gt;&gt;</value>
+    <value>すべて解放 &gt;&gt;</value>
   </data>
   <data name="UnlockResearchRemoveAll" xml:space="preserve">
-    <value>&lt;&lt; Remove all</value>
+    <value>&lt;&lt; すべて削除</value>
   </data>
   <data name="UnlockResearchUnlockAllAlternatives" xml:space="preserve">
-    <value>Unlock all alternatives &gt;&gt;</value>
+    <value>代替レシピをすべて解放 &gt;&gt;</value>
   </data>
   <data name="UnlockResearchUnlocked" xml:space="preserve">
-    <value>Unlocked</value>
+    <value>解放済み</value>
   </data>
   <data name="ButtonCancelAccel" xml:space="preserve">
-    <value>_Cancel</value>
+    <value>キャンセル(_C)</value>
   </data>
   <data name="ButtonDone" xml:space="preserve">
-    <value>_Done</value>
+    <value>完了(_D)</value>
   </data>
   <data name="MassDismantleTitle" xml:space="preserve">
-    <value>Mass delete</value>
+    <value>一括削除</value>
   </data>
   <data name="MassDismantleSubtitle" xml:space="preserve">
-    <value>Pick two points to define a rectangle of buildings to remove</value>
+    <value>削除する建物の範囲を矩形で指定するため、2 点を選択してください</value>
   </data>
   <data name="MassDismantleXCoord" xml:space="preserve">
-    <value>X coordinate</value>
+    <value>X 座標</value>
   </data>
   <data name="MassDismantleYCoord" xml:space="preserve">
-    <value>Y coordinate</value>
+    <value>Y 座標</value>
   </data>
   <data name="ButtonNextPoint" xml:space="preserve">
-    <value>_Next point</value>
+    <value>次の地点(_N)</value>
   </data>
   <data name="PropertiesTitle" xml:space="preserve">
-    <value>Properties</value>
+    <value>プロパティ</value>
   </data>
   <data name="PropertiesSubtitle" xml:space="preserve">
-    <value>Serialized properties on this object</value>
+    <value>このオブジェクトのシリアライズ済みプロパティ</value>
   </data>
   <data name="ButtonAddProperty" xml:space="preserve">
-    <value>+ Add property</value>
+    <value>+ プロパティを追加</value>
   </data>
   <data name="MsgAlreadyLatestVersion_Body" xml:space="preserve">
-    <value>You are already using the latest version.</value>
+    <value>すでに最新バージョンを使用しています。</value>
   </data>
   <data name="MsgUpdate_Title" xml:space="preserve">
-    <value>Update</value>
+    <value>更新</value>
   </data>
   <data name="FileFilterSaveGame" xml:space="preserve">
-    <value>Satisfactory save file|*.sav</value>
+    <value>Satisfactory セーブファイル|*.sav</value>
   </data>
   <data name="MsgBackupError_Body" xml:space="preserve">
-    <value>An error occurred while creating a backup. The error message will appear when you press 'Ok'.
-Please tell Goz3rr, Robb, or virusek20 the contents of the error, or report it on the Github Issues page with your log file and save file attached.</value>
+    <value>バックアップの作成中にエラーが発生しました。'OK' を押すとエラーメッセージが表示されます。
+Goz3rr、Robb、または virusek20 にエラー内容をお伝えいただくか、ログファイルとセーブファイルを添付して GitHub Issues ページにご報告ください。</value>
   </data>
   <data name="MsgBackupCreated_Body" xml:space="preserve">
-    <value>Backup created. Find it in your save file folder.</value>
+    <value>バックアップを作成しました。セーブファイル フォルダー内にあります。</value>
   </data>
   <data name="MsgDiscordRedirect_Body" xml:space="preserve">
-    <value>You are now being redirected to the Satisfactory Modding discord server. Please request help in the #savegame-edits channel.</value>
+    <value>Satisfactory Modding の Discord サーバーへリダイレクトします。#savegame-edits チャンネルでヘルプを依頼してください。</value>
   </data>
   <data name="MsgFicsitRedirect_Body" xml:space="preserve">
-    <value>You are now being redirected to the ficsit.app mod and tool repository to view a guide.</value>
+    <value>ficsit.app の Mod / ツール リポジトリへリダイレクトし、ガイドを表示します。</value>
   </data>
   <data name="MsgAboutEditorName_Body" xml:space="preserve">
-    <value>Satisfactory save editor</value>
+    <value>Satisfactory セーブ エディター</value>
   </data>
   <data name="MsgAbout_Title" xml:space="preserve">
-    <value>About</value>
+    <value>バージョン情報</value>
   </data>
   <data name="MsgUnsavedChangesOpen_Body" xml:space="preserve">
-    <value>You have unsaved changes. Abandon changes by opening another file?
+    <value>未保存の変更があります。別のファイルを開いて変更を破棄しますか?
 
-Note: Changes made in the data text fields are not yet tracked as saved/unsaved but are still saved.</value>
+注: データ テキスト フィールドでの変更は保存/未保存の追跡対象外ですが、保存は行われます。</value>
   </data>
   <data name="MsgUnsavedChanges_Title" xml:space="preserve">
-    <value>Unsaved Changes</value>
+    <value>未保存の変更</value>
   </data>
   <data name="MsgUnsavedChangesClose_Body" xml:space="preserve">
-    <value>You have unsaved changes. Close and abandon changes?
+    <value>未保存の変更があります。閉じて変更を破棄しますか?
 
-Note: Changes made in the data text fields are not yet tracked as saved/unsaved but are still saved.</value>
+注: データ テキスト フィールドでの変更は保存/未保存の追跡対象外ですが、保存は行われます。</value>
   </data>
   <data name="PromptJumpToTag_Title" xml:space="preserve">
-    <value>Jump to Tag</value>
+    <value>タグへジャンプ</value>
   </data>
   <data name="PromptJumpToTag_Caption" xml:space="preserve">
-    <value>Tag name:</value>
+    <value>タグ名:</value>
   </data>
   <data name="PromptJumpToTag_Detail" xml:space="preserve">
-    <value>Obtain via Right Click &gt; Copy name
-Example:
+    <value>右クリック &gt; 名前をコピー で取得できます
+例:
 Persistent_Level:PersistentLevel.Char_Player_C_0.inventory</value>
   </data>
   <data name="MsgJumpToTagFailed_Body" xml:space="preserve">
-    <value>Failed to jump to tag:
+    <value>タグへのジャンプに失敗しました:
 </value>
   </data>
   <data name="MsgRecentFileMissing_Body" xml:space="preserve">
-    <value>That file could no longer be found on the disk.
-It has been removed from the recent files list.</value>
+    <value>そのファイルはディスク上に見つかりませんでした。
+最近使ったファイル一覧から削除しました。</value>
   </data>
   <data name="MsgFileNotPresent_Title" xml:space="preserve">
-    <value>File not present</value>
+    <value>ファイルが存在しません</value>
   </data>
   <data name="MsgOpenFileError_Body" xml:space="preserve">
-    <value>An error occurred while opening the file:
+    <value>ファイルを開く際にエラーが発生しました:
 {0}
 
-Check the logs for more details.
+詳細はログを確認してください。
 
-If this issue persists, please report it via "Help &gt; Report an Issue", and attach the log file and save file you were trying to open.</value>
+この問題が続く場合は、「ヘルプ &gt; 問題を報告」からログファイルと開こうとしたセーブファイルを添付して報告してください。</value>
   </data>
   <data name="MsgErrorOpeningFile_Title" xml:space="preserve">
-    <value>Error opening file</value>
+    <value>ファイルを開けませんでした</value>
   </data>
   <data name="MsgEditorName_Caption" xml:space="preserve">
-    <value>Satisfactory Save Editor</value>
+    <value>Satisfactory セーブ エディター</value>
   </data>
   <data name="MsgAutoUpdateDisabled_Body" xml:space="preserve">
-    <value>You have disabled automatic update checking. You can re-enable it in the preferences menu or manually check for updates in the 'Help' menu.</value>
+    <value>自動更新確認を無効にしました。環境設定メニューから再度有効化するか、'ヘルプ' メニューから手動で更新を確認できます。</value>
   </data>
   <data name="PromptString_Title" xml:space="preserve">
-    <value>String Prompt</value>
+    <value>文字列入力</value>
   </data>
   <data name="PromptString_Caption" xml:space="preserve">
-    <value>Prompt String:</value>
+    <value>入力文字列:</value>
   </data>
   <data name="PromptString_Detail" xml:space="preserve">
-    <value>(1)Old Value Message
+    <value>(1)旧値メッセージ
 (2)
 (3)
 (4)
 (5)</value>
   </data>
   <data name="MsgInventoryEmptied_Body" xml:space="preserve">
-    <value>Inventory for storage {0} emptied</value>
+    <value>ストレージ {0} のインベントリを空にしました</value>
   </data>
   <data name="MsgInventoryEmptied_Title" xml:space="preserve">
-    <value>Inventory Emptied</value>
+    <value>インベントリを空にしました</value>
   </data>
   <data name="MsgNoUnlockSubsystem_Body" xml:space="preserve">
-    <value>This save does not contain a UnlockSubsystem.
-This means that the loaded save is probably corrupt. Aborting.</value>
+    <value>このセーブには UnlockSubsystem が含まれていません。
+読み込んだセーブが破損している可能性があります。中止します。</value>
   </data>
   <data name="MsgNoUnlockSubsystem_Title" xml:space="preserve">
-    <value>Cannot find UnlockSubsystem</value>
+    <value>UnlockSubsystem が見つかりません</value>
   </data>
   <data name="MsgArmSlotsUnchanged_Body" xml:space="preserve">
-    <value>Arm slot count unchanged</value>
+    <value>アームスロット数は変更されていません</value>
   </data>
   <data name="MsgUnchanged_Title" xml:space="preserve">
-    <value>Unchanged</value>
+    <value>変更なし</value>
   </data>
   <data name="MsgArmSlotsSet_Body" xml:space="preserve">
-    <value>Arm slot count set to {0} slots.
+    <value>アームスロット数を {0} スロットに設定しました。
 
-Please note that you may need to complete at least one milestone that unlocks arm slots for your changes to take effect.</value>
+変更を反映させるには、アームスロットを解放するマイルストーンを少なくとも 1 つ完了させる必要がある場合があります。</value>
   </data>
   <data name="MsgArmSlotsVisualWarning_Body" xml:space="preserve">
     <value>
 
-Arm slot counts greater than 6 cause visual problems in the inventory screen.</value>
+アームスロット数が 6 を超えると、インベントリ画面で表示の問題が発生します。</value>
   </data>
   <data name="MsgSuccess_Title" xml:space="preserve">
-    <value>Success</value>
+    <value>成功</value>
   </data>
   <data name="MsgNoResourceSinkSubsystem_Body" xml:space="preserve">
-    <value>This save does not contain a ResourceSinkSubsystem.
-This means that the loaded save is probably corrupt. Aborting.</value>
+    <value>このセーブには ResourceSinkSubsystem が含まれていません。
+読み込んだセーブが破損している可能性があります。中止します。</value>
   </data>
   <data name="MsgNoResourceSinkSubsystem_Title" xml:space="preserve">
-    <value>Cannot find ResourceSinkSubsystem</value>
+    <value>ResourceSinkSubsystem が見つかりません</value>
   </data>
   <data name="PromptCoupon_Title" xml:space="preserve">
-    <value>Enter earned ticket count</value>
+    <value>獲得チケット数を入力</value>
   </data>
   <data name="PromptCoupon_Caption" xml:space="preserve">
-    <value>Tickets</value>
+    <value>チケット</value>
   </data>
   <data name="PromptCoupon_Detail" xml:space="preserve">
-    <value>Sets the AWESOME Sink ticket prices as if you had earned N tickets.
-For example, entering 0 sets the price for the next ticket back to 1,000
-Current tickets earned: {0}
-More info on AWESOME Sink wiki page</value>
+    <value>AWESOME Sink のチケット価格を、N 枚獲得した状態に設定します。
+例えば 0 を入力すると、次のチケット価格が 1,000 に戻ります。
+現在の獲得チケット数: {0}
+詳細は AWESOME Sink の Wiki ページを参照してください</value>
   </data>
   <data name="MsgCouponMustBePositive_Body" xml:space="preserve">
-    <value>You must enter a number greater than 0.</value>
+    <value>0 より大きい数値を入力してください。</value>
   </data>
   <data name="MsgCouponUnchanged_Body" xml:space="preserve">
-    <value>Ticket count unchanged.</value>
+    <value>チケット数は変更されていません。</value>
   </data>
   <data name="MsgCouponMaxExceeded_Body" xml:space="preserve">
-    <value>The highest ticket count supported is about 288,100,000, since the highest supported points per ticket is around 9,223,372,036,854,775,807 (int64 max value)</value>
+    <value>サポートされる最大チケット数は約 288,100,000 です(1 チケットあたりの最大ポイントが約 9,223,372,036,854,775,807 (int64 の最大値) のため)</value>
   </data>
   <data name="MsgCouponMaxExceeded_Title" xml:space="preserve">
-    <value>That's a lot of tickets!</value>
+    <value>チケットが多すぎます!</value>
   </data>
   <data name="MsgCouponSet_Body" xml:space="preserve">
-    <value>Earned ticket count set to {0}.</value>
+    <value>獲得チケット数を {0} に設定しました。</value>
   </data>
   <data name="MsgCouldNotParse_Body" xml:space="preserve">
-    <value>Could not parse: {0}</value>
+    <value>解析できませんでした: {0}</value>
   </data>
   <data name="MsgNoCrates_Body" xml:space="preserve">
-    <value>This save does not appear to have any crates.
-Crates appear on death and when your inventory is too full to hold items during deconstruction.</value>
+    <value>このセーブにはクレートが存在しないようです。
+クレートは死亡時、または解体中にインベントリが満杯でアイテムを保持できないときに出現します。</value>
   </data>
   <data name="MsgNoCrates_Title" xml:space="preserve">
-    <value>Cannot find any Crates</value>
+    <value>クレートが見つかりません</value>
   </data>
   <data name="MsgNoHostPlayerSimple_Body" xml:space="preserve">
-    <value>This save does not contain a host player or it is corrupt.
-Try loading and re-saving the save from within the game.</value>
+    <value>このセーブにはホストプレイヤーが存在しないか、破損しています。
+ゲーム内で読み込み直して保存し直してみてください。</value>
   </data>
   <data name="MsgNoHostPlayer_Title" xml:space="preserve">
-    <value>Cannot find host player</value>
+    <value>ホストプレイヤーが見つかりません</value>
   </data>
   <data name="MsgCratesMoved_Body" xml:space="preserve">
-    <value>Successfully moved {0} crates to the host player. They are stacked in piles of 5 slightly east of you.</value>
+    <value>{0} 個のクレートをホストプレイヤーへ移動しました。プレイヤーの少し東側に 5 個ずつ積まれています。</value>
   </data>
   <data name="MsgDuplicateSchematicsRemoved_Body" xml:space="preserve">
-    <value>Removed {0} duplicate schematics.</value>
+    <value>重複した設計図を {0} 件削除しました。</value>
   </data>
   <data name="MsgSaveMissingSubsystem_Body" xml:space="preserve">
-    <value>This save does not contain a {0}.
-This means that the loaded save is probably corrupt. Aborting.</value>
+    <value>このセーブには {0} が含まれていません。
+読み込んだセーブが破損している可能性があります。中止します。</value>
   </data>
   <data name="MsgCannotFindSubsystem_Title" xml:space="preserve">
-    <value>Cannot find {0}</value>
+    <value>{0} が見つかりません</value>
   </data>
   <data name="MsgNoHostPlayer_Body" xml:space="preserve">
-    <value>This save does not contain a host player or it is corrupt.</value>
+    <value>このセーブにはホストプレイヤーが存在しないか、破損しています。</value>
   </data>
   <data name="MsgNoAnimals_Body" xml:space="preserve">
-    <value>This save does not contain animals or it is corrupt.</value>
+    <value>このセーブには動物が存在しないか、破損しています。</value>
   </data>
   <data name="MsgNoAnimals_Title" xml:space="preserve">
-    <value>Cannot find animals</value>
+    <value>動物が見つかりません</value>
   </data>
   <data name="MsgEnemiesDeleted_Body" xml:space="preserve">
-    <value>Deleted all spawned enemies, and all unspawned creatures (enemy &amp; friendly). Would you like 3 tamed Lizzard Doggos as a compensation?</value>
+    <value>スポーン済みの敵と、未スポーンの全クリーチャー(敵対 &amp; 友好)を削除しました。お詫びにテイム済みの Lizzard Doggo を 3 匹差し上げましょうか?</value>
   </data>
   <data name="PromptEverythingBox_Title" xml:space="preserve">
-    <value>Enter quantity of each item to spawn</value>
+    <value>スポーンする各アイテムの数量を入力</value>
   </data>
   <data name="PromptCountInteger_Caption" xml:space="preserve">
-    <value>Count (integer):</value>
+    <value>数量 (整数):</value>
   </data>
   <data name="MsgQuantityInvalid_Body" xml:space="preserve">
-    <value>The quantity you entered is invalid.</value>
+    <value>入力された数量は無効です。</value>
   </data>
   <data name="MsgEverythingBoxCreated_Body" xml:space="preserve">
-    <value>Crate created.
-Note that normally unstackable items will visually display as being stacked to 1. Use Ctrl+Click to transfer items out of the crate without deleting part of the stack.
+    <value>クレートを作成しました。
+通常スタックできないアイテムは見た目上 1 個でスタック表示されます。スタックの一部を消失させずにクレートからアイテムを取り出すには Ctrl + クリックを使用してください。
 
-Skipped the following items marked as radioactive:
+放射性としてマークされた以下のアイテムはスキップされました:
 
 {0}</value>
   </data>
   <data name="MsgEverythingBoxProcessed_Title" xml:space="preserve">
-    <value>Processed {0} resource paths</value>
+    <value>{0} 件のリソース パスを処理しました</value>
   </data>
   <data name="MsgInventorySlotsUnchanged_Body" xml:space="preserve">
-    <value>Inventory slot count unchanged</value>
+    <value>インベントリのスロット数は変更されていません</value>
   </data>
   <data name="MsgInventorySlotsSet_Body" xml:space="preserve">
-    <value>Inventory slot count set to {0} slots.</value>
+    <value>インベントリのスロット数を {0} スロットに設定しました。</value>
   </data>
   <data name="MsgNoPlayer_Body" xml:space="preserve">
-    <value>This save does not contain a Player.
-This means that the loaded save is probably corrupt. Aborting.</value>
+    <value>このセーブには Player が含まれていません。
+読み込んだセーブが破損している可能性があります。中止します。</value>
   </data>
   <data name="MsgNoPlayer_Title" xml:space="preserve">
-    <value>Cannot find Player</value>
+    <value>Player が見つかりません</value>
   </data>
   <data name="MsgKilledPlayers_Body" xml:space="preserve">
-    <value>Killed {0}.</value>
+    <value>{0} を倒しました。</value>
   </data>
   <data name="MsgMassDismantleNeed2Points_Body" xml:space="preserve">
-    <value>At least 2 points needed to mass dismantle</value>
+    <value>一括解体には少なくとも 2 点が必要です</value>
   </data>
   <data name="MsgMassDismantleFailed_Title" xml:space="preserve">
-    <value>Could not mass dismantle</value>
+    <value>一括解体できませんでした</value>
   </data>
   <data name="MsgMassDismantleNothing_Body" xml:space="preserve">
-    <value>Nothing was dismantled. Make sure the coordinates are correct and in clockwise order.</value>
+    <value>何も解体されませんでした。座標が正しく、時計回りの順序になっていることを確認してください。</value>
   </data>
   <data name="MsgMassDismantle_Title" xml:space="preserve">
-    <value>Mass dismantle</value>
+    <value>一括解体</value>
   </data>
   <data name="MsgMassDismantleResult_Body" xml:space="preserve">
-    <value>Dismantled {0} factory buildings, {1} foundations and {2} crates. Drop the items (including items in storages) in a single crate?</value>
+    <value>工場建築物 {0} 個、土台 {1} 個、クレート {2} 個を解体しました。アイテム(ストレージ内のアイテムを含む)を 1 つのクレートにまとめて落としますか?</value>
   </data>
   <data name="MsgDismantled_Title" xml:space="preserve">
-    <value>Dismantled</value>
+    <value>解体完了</value>
   </data>
   <data name="MassDismantleMinZ_Caption" xml:space="preserve">
-    <value>Minimum Z</value>
+    <value>Z 最小値</value>
   </data>
   <data name="MassDismantleMaxZ_Caption" xml:space="preserve">
-    <value>Maximum Z</value>
+    <value>Z 最大値</value>
   </data>
   <data name="MsgEnterCoordinates_Title" xml:space="preserve">
-    <value>Enter coordinates</value>
+    <value>座標を入力</value>
   </data>
   <data name="MsgCoordinateFormat_Body" xml:space="preserve">
-    <value>Coordinate format: 123456</value>
+    <value>座標形式: 123456</value>
   </data>
   <data name="MsgNoGameState_Body" xml:space="preserve">
-    <value>This save does not contain a GameState.
-This means that the loaded save is probably corrupt. Aborting.</value>
+    <value>このセーブには GameState が含まれていません。
+読み込んだセーブが破損している可能性があります。中止します。</value>
   </data>
   <data name="MsgNoGameState_Title" xml:space="preserve">
-    <value>Cannot find GameState</value>
+    <value>GameState が見つかりません</value>
   </data>
   <data name="MsgNoCostEnabled_Body" xml:space="preserve">
-    <value>Enabled no building cost cheat</value>
+    <value>建築コストなしチートを有効化しました</value>
   </data>
   <data name="MsgNoCostDisabled_Body" xml:space="preserve">
-    <value>Disabled no building cost cheat</value>
+    <value>建築コストなしチートを無効化しました</value>
   </data>
   <data name="MsgNoPowerEnabled_Body" xml:space="preserve">
-    <value>Enabled no power cheat.
-Note that buildings still need to be connected to an electrical network to function</value>
+    <value>電力不要チートを有効化しました。
+建物が動作するには、引き続き電力ネットワークへ接続する必要があります。</value>
   </data>
   <data name="MsgNoPowerDisabled_Body" xml:space="preserve">
-    <value>Disabled no power cheat</value>
+    <value>電力不要チートを無効化しました</value>
   </data>
   <data name="MsgBuildHubFirst_Body" xml:space="preserve">
-    <value>You should build a hub before attempting to unlock all research.</value>
+    <value>すべての研究を解放する前に、ハブを建設してください。</value>
   </data>
   <data name="MsgNoHubFound_Title" xml:space="preserve">
-    <value>No hub found</value>
+    <value>ハブが見つかりません</value>
   </data>
   <data name="MsgResearchUnlocked_Body" xml:space="preserve">
-    <value>Research successfully unlocked.</value>
+    <value>研究の解放に成功しました。</value>
   </data>
   <data name="MsgNoMapManager_Body" xml:space="preserve">
-    <value>This save does not contain a MapManager.
-This means that the loaded save is probably corrupt. Aborting.</value>
+    <value>このセーブには MapManager が含まれていません。
+読み込んだセーブが破損している可能性があります。中止します。</value>
   </data>
   <data name="MsgNoMapManager_Title" xml:space="preserve">
-    <value>Cannot find MapManager</value>
+    <value>MapManager が見つかりません</value>
   </data>
   <data name="MsgFogOfWarWrongType_Body" xml:space="preserve">
-    <value>FogOfWarRawData is of wrong type.
-This means that the loaded save is probably corrupt. Aborting.</value>
+    <value>FogOfWarRawData の型が正しくありません。
+読み込んだセーブが破損している可能性があります。中止します。</value>
   </data>
   <data name="MsgWrongPropertyType_Title" xml:space="preserve">
-    <value>Wrong property type</value>
+    <value>プロパティの型が正しくありません</value>
   </data>
   <data name="MsgFogOfWarUnexpectedCount_Body" xml:space="preserve">
-    <value>Expected 1048576 fog of war elements to be present, but there were actually {0}.
-This does not necessarily mean that the process will fail. Please report this error on the Github Issues page regardless.</value>
+    <value>FogOfWar 要素は 1048576 個あるはずですが、実際は {0} 個でした。
+必ずしも処理が失敗するとは限りませんが、GitHub Issues ページにこのエラーをご報告ください。</value>
   </data>
   <data name="MsgWarning_Title" xml:space="preserve">
-    <value>Warning</value>
+    <value>警告</value>
   </data>
   <data name="PromptRevealMap_Title" xml:space="preserve">
-    <value>Enter map reveal threshold</value>
+    <value>マップ公開しきい値を入力</value>
   </data>
   <data name="PromptRevealMap_Caption" xml:space="preserve">
-    <value>Enter a number between 0 and 255 (integer):</value>
+    <value>0 から 255 までの整数を入力してください:</value>
   </data>
   <data name="PromptRevealMap_Detail" xml:space="preserve">
-    <value>Sets the reveal state of every map region to the value you choose.
-255 is fully explored
-0 is entirely unexplored</value>
+    <value>マップ全領域の公開状態を指定した値に設定します。
+255 で完全踏破
+0 で完全未踏破</value>
   </data>
   <data name="MsgRevealMapRange_Body" xml:space="preserve">
-    <value>You must enter a number between 0 and 255.</value>
+    <value>0 から 255 までの数値を入力してください。</value>
   </data>
   <data name="MsgMapDataUncovered_Body" xml:space="preserve">
-    <value>Map data uncovered. Remember to enable the map as well if desired.</value>
+    <value>マップデータを公開しました。必要に応じてマップ自体も有効化してください。</value>
   </data>
   <data name="PromptDoggoCount_Title" xml:space="preserve">
-    <value>Enter doggo count</value>
+    <value>ドッゴの数を入力</value>
   </data>
   <data name="MsgDoggoSpawned_Body" xml:space="preserve">
-    <value>Spawned {0} doggo(s) at the host player.</value>
+    <value>ホストプレイヤーの位置に {0} 匹のドッゴをスポーンしました。</value>
   </data>
   <data name="MsgDoggoCannotSpawn_Body" xml:space="preserve">
-    <value>You can't spawn {0} doggos.</value>
+    <value>{0} 匹のドッゴはスポーンできません。</value>
   </data>
   <data name="MsgNoUnlockSubsystemMap_Body" xml:space="preserve">
-    <value>This save does not contain an UnlockSubsystem.
-This means that the loaded save is probably corrupt. Aborting.</value>
+    <value>このセーブには UnlockSubsystem が含まれていません。
+読み込んだセーブが破損している可能性があります。中止します。</value>
   </data>
   <data name="MsgMapUnlocked_Body" xml:space="preserve">
-    <value>Map unlocked</value>
+    <value>マップを解放しました</value>
   </data>
 </root>

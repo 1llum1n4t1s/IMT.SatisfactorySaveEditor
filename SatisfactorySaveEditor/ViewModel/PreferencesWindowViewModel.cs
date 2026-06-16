@@ -1,14 +1,19 @@
-﻿using System.Windows;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+﻿using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using SatisfactorySaveEditor.Util;
 
 namespace SatisfactorySaveEditor.ViewModel
 {
-    public class PreferencesWindowViewModel : ViewModelBase
+    public class PreferencesWindowViewModel : ObservableObject
     {
         private bool canApply;
         private bool autoUpdate;
         private bool autoBackup;
+        private CultureInfo selectedCulture;
         //private int backupCount; //Future
 
 
@@ -17,8 +22,8 @@ namespace SatisfactorySaveEditor.ViewModel
             get => autoUpdate;
             set
             {
-                Set(() => AutoUpdate, ref autoUpdate, value);
-                Set(() => CanApply, ref canApply, true);
+                SetProperty(ref autoUpdate, value, nameof(AutoUpdate));
+                SetProperty(ref canApply, true, nameof(CanApply));
             }
         }
 
@@ -27,8 +32,23 @@ namespace SatisfactorySaveEditor.ViewModel
             get => autoBackup;
             set
             {
-                Set(() => AutoBackup, ref autoBackup, value);
-                Set(() => CanApply, ref canApply, true);
+                SetProperty(ref autoBackup, value, nameof(AutoBackup));
+                SetProperty(ref canApply, true, nameof(CanApply));
+            }
+        }
+
+        public IReadOnlyList<CultureInfo> AvailableCultures => LocalizationService.Instance.SupportedCultures;
+
+        public CultureInfo SelectedCulture
+        {
+            get => selectedCulture;
+            set
+            {
+                if (value == null) return;
+                SetProperty(ref selectedCulture, value, nameof(SelectedCulture));
+                // 言語切替は即時反映 (Apply を待たない)
+                LocalizationService.Instance.CurrentCulture = value;
+                SetProperty(ref canApply, true, nameof(CanApply));
             }
         }
 
@@ -38,8 +58,8 @@ namespace SatisfactorySaveEditor.ViewModel
             get => backupCount;
             set
             {
-                Set(() => BackupCount, ref backupCount, value);
-                Set(() => CanApply, ref canApply, true);
+                SetProperty(ref backupCount, value, nameof(BackupCount));
+                SetProperty(ref canApply, true, nameof(CanApply));
             }
         }*/
 
@@ -57,6 +77,11 @@ namespace SatisfactorySaveEditor.ViewModel
 
             autoUpdate = Properties.Settings.Default.AutoUpdate;
             autoBackup = Properties.Settings.Default.AutoBackup;
+
+            // 現在カルチャを SupportedCultures から同名で探して選択中にする
+            var current = LocalizationService.Instance.CurrentCulture;
+            selectedCulture = AvailableCultures.FirstOrDefault(c => c.TwoLetterISOLanguageName == current.TwoLetterISOLanguageName)
+                ?? AvailableCultures[0];
         }
 
         private void Accept(Window window)
@@ -69,9 +94,10 @@ namespace SatisfactorySaveEditor.ViewModel
         {
             Properties.Settings.Default.AutoUpdate = autoUpdate;
             Properties.Settings.Default.AutoBackup = autoBackup;
+            Properties.Settings.Default.Culture = selectedCulture?.Name ?? string.Empty;
 
             Properties.Settings.Default.Save();
-            Set(() => CanApply, ref canApply, false);
+            SetProperty(ref canApply, false, nameof(CanApply));
         }
 
         private void Cancel(Window window)

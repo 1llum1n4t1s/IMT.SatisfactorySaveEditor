@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Shapes;
 using SatisfactorySaveParser.PropertyTypes.Structs;
 
 namespace SatisfactorySaveEditor.View.Control
@@ -25,7 +24,7 @@ namespace SatisfactorySaveEditor.View.Control
 
         private void OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            PreviewRectangle.GetBindingExpression(Shape.FillProperty)?.UpdateTarget();
+            PreviewRectangle.GetBindingExpression(Border.BackgroundProperty)?.UpdateTarget();
         }
     }
 }

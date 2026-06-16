@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.Util;
 
 namespace SatisfactorySaveEditor.ViewModel
 {
-    public class UpdateWindowViewModel : ViewModelBase
+    public class UpdateWindowViewModel : ObservableObject
     {
         private readonly UpdateChecker.VersionInfo info;
 
@@ -34,7 +35,7 @@ namespace SatisfactorySaveEditor.ViewModel
         private void DisableAutoCheck(Window window)
         {
             Properties.Settings.Default.AutoUpdate = false;
-            MessageBox.Show("You have disabled automatic update checking. You can re-enable it in the preferences menu or manually check for updates in the 'Help' menu.", "Update", MessageBoxButton.OK);
+            MessageBox.Show(Resources.MsgAutoUpdateDisabled_Body, Resources.MsgEditorName_Caption, MessageBoxButton.OK);
 
             Properties.Settings.Default.Save();
             window.Close();
@@ -42,7 +43,7 @@ namespace SatisfactorySaveEditor.ViewModel
 
         private void Open(Window window)
         {
-            Process.Start(info.ReleaseUrl);
+            Process.Start(new ProcessStartInfo(info.ReleaseUrl) { UseShellExecute = true });
             window.Close();
         }
     }

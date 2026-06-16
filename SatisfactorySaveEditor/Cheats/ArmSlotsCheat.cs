@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.View;
 using SatisfactorySaveEditor.ViewModel;
 using SatisfactorySaveEditor.ViewModel.Property;
@@ -18,7 +19,7 @@ namespace SatisfactorySaveEditor.Cheats
             var gameState = rootItem.FindChild("Persistent_Level:PersistentLevel.UnlockSubsystem", false);
             if (gameState == null)
             {
-                MessageBox.Show("This save does not contain a UnlockSubsystem.\nThis means that the loaded save is probably corrupt. Aborting.", "Cannot find UnlockSubsystem", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoUnlockSubsystem_Body, Resources.MsgNoUnlockSubsystem_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
@@ -35,15 +36,15 @@ namespace SatisfactorySaveEditor.Cheats
 
             if (cvm.NumberChosen < 0 || cvm.NumberChosen == numAdditionalArmSlots.Value)
             {
-                MessageBox.Show("Arm slot count unchanged", "Unchanged", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Resources.MsgArmSlotsUnchanged_Body, Resources.MsgUnchanged_Title, MessageBoxButton.OK, MessageBoxImage.Information);
                 return false;
             }
 
             numAdditionalArmSlots.Value = cvm.NumberChosen;
-            string message = $"Arm slot count set to {cvm.NumberChosen} slots.\n\nPlease note that you may need to complete at least one milestone that unlocks arm slots for your changes to take effect.";
+            string message = string.Format(Resources.MsgArmSlotsSet_Body, cvm.NumberChosen);
             if (numAdditionalArmSlots.Value > 6)
-                message += "\n\nArm slot counts greater than 6 cause visual problems in the inventory screen.";
-            MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                message += Resources.MsgArmSlotsVisualWarning_Body;
+            MessageBox.Show(message, Resources.MsgSuccess_Title, MessageBoxButton.OK, MessageBoxImage.Information);
             return true;
         }
     }

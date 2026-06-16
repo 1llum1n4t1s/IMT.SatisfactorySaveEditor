@@ -1,13 +1,13 @@
-﻿<Window x:Class="SatisfactorySaveEditor.View.MainWindow"
+<Window x:Class="SatisfactorySaveEditor.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:command="http://www.galasoft.ch/mvvmlight"
         xmlns:model="clr-namespace:SatisfactorySaveEditor.Model"
         xmlns:converter="clr-namespace:SatisfactorySaveEditor.Converter"
         xmlns:util="clr-namespace:SatisfactorySaveEditor.Util"
+        xmlns:loc="clr-namespace:SatisfactorySaveEditor.Util"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:control="clr-namespace:SatisfactorySaveEditor.View.Control"
         xmlns:dd="urn:gong-wpf-dragdrop"
@@ -18,26 +18,33 @@
         WindowStartupLocation="Manual"
         DataContext="{Binding MainViewModel, Source={StaticResource Locator}, Mode=OneTime}"
         Closed="MainWindow_OnClosed"
-        Title="{Binding FileName, StringFormat='Satisfactory Save Editor{0}'}">
+        Title="{Binding FileName, StringFormat='Satisfactory Save Editor{0}'}"
+        Background="{DynamicResource Brush.Window}"
+        Foreground="{DynamicResource Brush.FG1}"
+        FontFamily="{StaticResource Font.UI}"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType">
+
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
-            <command:EventToCommand Command="{Binding ExitCommand}" PassEventArgsToCommand="True" />
+            <i:InvokeCommandAction Command="{Binding ExitCommand}" PassEventArgsToCommand="True" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
+
     <Window.Resources>
-        <util:BindingProxy x:Key="Proxy" Data="{Binding}"/>
-        <converter:SaveNodeItemToStringConverter x:Key="SaveNodeItemToStringConverter"/>
-        <converter:SaveNodeInventoryToStringConverter x:Key="SaveNodeInventoryToStringConverter"/>
-        <converter:MenuTextConverter x:Key="MenuTextConverter"/>
-        <converter:TypeTooltipConverter x:Key="TypeTooltipConverter"/>
-        <converter:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <util:BindingProxy x:Key="Proxy" Data="{Binding}" />
+        <converter:SaveNodeItemToStringConverter x:Key="SaveNodeItemToStringConverter" />
+        <converter:SaveNodeInventoryToStringConverter x:Key="SaveNodeInventoryToStringConverter" />
+        <converter:MenuTextConverter x:Key="MenuTextConverter" />
+        <converter:TypeTooltipConverter x:Key="TypeTooltipConverter" />
+        <converter:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         <ObjectDataProvider x:Key="ESessionVisibilityEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="save:ESessionVisibility"/>
+                <x:Type TypeName="save:ESessionVisibility" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
     </Window.Resources>
+
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="O" Command="{Binding OpenCommand}" />
         <KeyBinding Modifiers="Control" Key="S" Command="{Binding SaveCommand}">
@@ -51,352 +58,478 @@
             </KeyBinding.CommandParameter>
         </KeyBinding>
     </Window.InputBindings>
+
     <DockPanel>
-        <Menu DockPanel.Dock="Top" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}">
-            <MenuItem Header="_File">
-                <MenuItem Header="_Open..." InputGestureText="Ctrl+O" Command="{Binding OpenCommand}"/>
-                <MenuItem Header="Open recent" ItemsSource="{Binding LastFiles}" Command="{Binding OpenCommand}">
-                    <MenuItem.ItemContainerStyle>
-                        <Style TargetType="{x:Type MenuItem}">
-                            <Setter Property="Command" Value="{Binding Source={StaticResource Proxy}, Path=Data.OpenCommand}"/>
-                            <Setter Property="CommandParameter" Value="{Binding}"/>
-                            <Setter Property="Header" Value="{Binding ., Converter={StaticResource MenuTextConverter}}"/>
-                        </Style>
-                    </MenuItem.ItemContainerStyle>
-                </MenuItem>
-                <MenuItem Header="_Save" InputGestureText="Ctrl+S" Command="{Binding SaveCommand}">
-                    <MenuItem.CommandParameter>
-                        <sys:Boolean>False</sys:Boolean>
-                    </MenuItem.CommandParameter>
-                </MenuItem>
-                <MenuItem Header="_Save as..." InputGestureText="F12" Command="{Binding SaveCommand}">
-                    <MenuItem.CommandParameter>
-                        <sys:Boolean>True</sys:Boolean>
-                    </MenuItem.CommandParameter>
-                </MenuItem>
-                <MenuItem Header="_Create backup" Command="{Binding ManualBackupCommand}">
-                    <MenuItem.CommandParameter>
-                        <sys:Boolean>True</sys:Boolean>
-                    </MenuItem.CommandParameter>
-                </MenuItem>
-                <Separator/>
-                <MenuItem Header="Jump to tag..." InputGestureText="Ctrl+J" Command="{Binding JumpMenuCommand}">
-                    <MenuItem.CommandParameter>
-                        <sys:Boolean>False</sys:Boolean>
-                    </MenuItem.CommandParameter>
-                </MenuItem>
-                <Separator/>
-                <MenuItem Header="Preferences" Command="{Binding PreferencesCommand}"/>
-                <MenuItem Header="_Exit" InputGestureText="Alt+F4" Command="{Binding ExitCommand}"/>
-            </MenuItem>
-            <MenuItem Header="_Cheats" ItemsSource="{Binding CheatMenuItems}">
-                <MenuItem.ItemContainerStyle>
-                    <Style TargetType="{x:Type MenuItem}">
-                        <Setter Property="Header" Value="{Binding Path=Name}" />
-                        <Setter Property="Command" Value="{Binding DataContext.CheatCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type MenuItem}, AncestorLevel=1}}" />
-                        <Setter Property="CommandParameter" Value="{Binding}" />
-                    </Style>
-                </MenuItem.ItemContainerStyle>
-            </MenuItem>
-            <MenuItem Header="_Help">
-                <MenuItem Header="View guides on ficsit.app" Command="{Binding Help_FicsitAppGuideCommand}"/>
-                <MenuItem Header="Request help on Discord" Command="{Binding Help_RequestHelpDiscordCommand}"/>
-                <Separator/>
-                <MenuItem Header="View on GitHub" Command="{Binding Help_ViewGithubCommand}"/>
-                <MenuItem Header="Report an Issue" Command="{Binding Help_ReportIssueCommand}"/>
-                <MenuItem Header="Check for updates" Command="{Binding CheckUpdatesCommand}"/>
-                <Separator/>
-                <MenuItem Header="About" Command="{Binding AboutCommand}"/>
-            </MenuItem>
-        </Menu>
-        <Separator DockPanel.Dock="Top" Opacity="0.25"/>
-        <Grid Margin="5">
-            
+
+        <!-- ============================================================
+             タイトルバー（半透明アンダーライン）
+             メニュー + ファイル名サブタイトルをフラットに並べる
+             ============================================================ -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource Brush.TitleBar}"
+                BorderBrush="{DynamicResource Brush.TitleBarBorder}"
+                BorderThickness="0,0,0,1">
+            <Grid IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}">
+                <Menu Background="Transparent" Padding="4">
+                    <MenuItem Header="{loc:Tr Key=MenuFile}">
+                        <MenuItem Header="{loc:Tr Key=MenuOpen}" InputGestureText="Ctrl+O" Command="{Binding OpenCommand}" />
+                        <MenuItem Header="{loc:Tr Key=MenuOpenRecent}" ItemsSource="{Binding LastFiles}" Command="{Binding OpenCommand}">
+                            <MenuItem.ItemContainerStyle>
+                                <Style TargetType="{x:Type MenuItem}">
+                                    <Setter Property="Command" Value="{Binding Source={StaticResource Proxy}, Path=Data.OpenCommand}" />
+                                    <Setter Property="CommandParameter" Value="{Binding}" />
+                                    <Setter Property="Header" Value="{Binding ., Converter={StaticResource MenuTextConverter}}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                        <MenuItem Header="{loc:Tr Key=MenuSave}" InputGestureText="Ctrl+S" Command="{Binding SaveCommand}">
+                            <MenuItem.CommandParameter>
+                                <sys:Boolean>False</sys:Boolean>
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                        <MenuItem Header="{loc:Tr Key=MenuSaveAs}" InputGestureText="F12" Command="{Binding SaveCommand}">
+                            <MenuItem.CommandParameter>
+                                <sys:Boolean>True</sys:Boolean>
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                        <MenuItem Header="{loc:Tr Key=MenuCreateBackup}" Command="{Binding ManualBackupCommand}">
+                            <MenuItem.CommandParameter>
+                                <sys:Boolean>True</sys:Boolean>
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="{loc:Tr Key=MenuJumpToTag}" InputGestureText="Ctrl+J" Command="{Binding JumpMenuCommand}">
+                            <MenuItem.CommandParameter>
+                                <sys:Boolean>False</sys:Boolean>
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="{loc:Tr Key=PrefsTitle}" Command="{Binding PreferencesCommand}" />
+                        <MenuItem Header="{loc:Tr Key=MenuExit}" InputGestureText="Alt+F4" Command="{Binding ExitCommand}" />
+                    </MenuItem>
+                    <MenuItem Header="{loc:Tr Key=MenuCheats}" ItemsSource="{Binding CheatMenuItems}">
+                        <MenuItem.ItemContainerStyle>
+                            <Style TargetType="{x:Type MenuItem}">
+                                <Setter Property="Header" Value="{Binding Path=Name}" />
+                                <Setter Property="Command" Value="{Binding DataContext.CheatCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type MenuItem}, AncestorLevel=1}}" />
+                                <Setter Property="CommandParameter" Value="{Binding}" />
+                            </Style>
+                        </MenuItem.ItemContainerStyle>
+                    </MenuItem>
+                    <MenuItem Header="{loc:Tr Key=MenuHelp}">
+                        <MenuItem Header="{loc:Tr Key=MenuViewGuidesFicsit}" Command="{Binding Help_FicsitAppGuideCommand}" />
+                        <MenuItem Header="{loc:Tr Key=MenuRequestHelpDiscord}" Command="{Binding Help_RequestHelpDiscordCommand}" />
+                        <Separator />
+                        <MenuItem Header="{loc:Tr Key=MenuViewOnGitHub}" Command="{Binding Help_ViewGithubCommand}" />
+                        <MenuItem Header="{loc:Tr Key=MenuReportIssue}" Command="{Binding Help_ReportIssueCommand}" />
+                        <MenuItem Header="{loc:Tr Key=MenuCheckForUpdates}" Command="{Binding CheckUpdatesCommand}" />
+                        <Separator />
+                        <MenuItem Header="{loc:Tr Key=MsgAbout_Title}" Command="{Binding AboutCommand}" />
+                    </MenuItem>
+                </Menu>
+            </Grid>
+        </Border>
+
+        <!-- ============================================================
+             メインレイアウト：左カラム（検索 + ツリー） + 右カラム（プロパティ）
+             ============================================================ -->
+        <Grid Margin="16,12,16,16">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*" MinWidth="240" />
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="3*" MinWidth="360" />
             </Grid.ColumnDefinitions>
-            
-            <DockPanel Grid.Column="0">
-                <Grid DockPanel.Dock="Top">
-                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Stretch" x:Name="SearchTermTextBox" Margin="0,2"/>
-                    <TextBlock IsHitTestVisible="False" Text="Search Save Entity and Component names" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="6,0,0,0" Foreground="DarkGray">
-                        <TextBlock.Style>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Text, ElementName=SearchTermTextBox}" Value="">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
 
-                    <Image Source="../../Icon/search.png" RenderOptions.BitmapScalingMode="Fant" HorizontalAlignment="Right" Width="13" Height="13" Margin="0,0,6,0">
-                        <Image.Style>
-                            <Style TargetType="{x:Type Image}">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Text, ElementName=SearchTermTextBox}" Value="">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
-
-                    <Button Margin="0,0,6,0" Width="13" Height="13" VerticalContentAlignment="Center" HorizontalAlignment="Right" Command="{Binding ResetSearchCommand}">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Text, ElementName=SearchTermTextBox}" Value="">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <Button.Content>
-                            <TextBlock Text="X" FontWeight="DemiBold" Foreground="Red" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Button.Content>
-                        <Button.Template>
-                            <ControlTemplate TargetType="{x:Type Button}">
-                                <Grid x:Name="grid">
-                                    <Border x:Name="border" CornerRadius="3" BorderBrush="#707070" BorderThickness="1" Background="White">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontWeight="Normal"/>
-                                    </Border>
-                                </Grid>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" TargetName="border" Value="#BEE6FD"/>
-                                        <Setter Property="BorderBrush" TargetName="border" Value="#3C7FB1"/>
-                                    </Trigger>
-                                    <Trigger Property="IsPressed" Value="True">
-                                        <Setter Property="BorderBrush" TargetName="border" Value="#2C628B"/>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Opacity" TargetName="grid" Value="0.25"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </Grid>
-                <TreeView DockPanel.Dock="Top" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" Name="SaveNodeTreeView" ItemsSource="{Binding RootItem}">
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <EventSetter Event="Selected" Handler="TreeViewSelectedItemChanged"/>
-                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" /> 
-                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                            <Setter Property="ToolTip" Value="{Binding Type, Mode=OneTime, Converter={StaticResource TypeTooltipConverter}}"/>
-                        </Style>
-                    </TreeView.ItemContainerStyle>
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="SelectedItemChanged">
-                            <command:EventToCommand Command="{Binding Source={StaticResource Proxy}, Path=Data.TreeSelectCommand}" CommandParameter="{Binding ElementName=SaveNodeTreeView, Path=SelectedItem}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                    <TreeView.Resources>
-                        <HierarchicalDataTemplate DataType="{x:Type model:SaveComponentModel}" ItemsSource="{Binding Items}">
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Header="Copy name" Command="{Binding CopyNameCommand}"/>
-                                        <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}"/>
-                                        <MenuItem Header="Fill Inventory" Command="{Binding FillInventoryCommand}"/>
-                                        <MenuItem Header="Empty Inventory" Command="{Binding EmptyInventoryCommand}"/>
-                                        <Separator/>
-                                        <MenuItem Header="Delete" Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                                    </ContextMenu>
-                                </StackPanel.ContextMenu>
-                                <TextBlock Text="[C] " Foreground="Green"/>
-                                <TextBlock>
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource SaveNodeItemToStringConverter}">
-                                            <Binding Path="Title"/>
-                                            <Binding Path="Items"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                                <TextBlock Foreground="Blue">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource SaveNodeInventoryToStringConverter}">
-                                            <Binding Path="Inventory"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </StackPanel>
-                        </HierarchicalDataTemplate>
-                        <HierarchicalDataTemplate DataType="{x:Type model:SaveObjectModel}" ItemsSource="{Binding Items}">
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Header="Copy name" Command="{Binding CopyNameCommand}"/>
-                                        <Separator/>
-                                        <MenuItem Header="Add">
-                                            <MenuItem Header="Entity"/>
-                                            <MenuItem Header="Component"/>
-                                        </MenuItem>
-                                        <MenuItem Header="Delete" Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                                    </ContextMenu>
-                                </StackPanel.ContextMenu>
-                                <TextBlock Text="[O] " Foreground="Violet"/>
-                                <TextBlock>
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource SaveNodeItemToStringConverter}">
-                                            <Binding Path="Title"/>
-                                            <Binding Path="Items"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </StackPanel>
-                        </HierarchicalDataTemplate>
-                        <HierarchicalDataTemplate DataType="{x:Type model:SaveEntityModel}" ItemsSource="{Binding Items}">
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Header="Copy name" Command="{Binding CopyNameCommand}"/>
-                                        <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}"/>
-                                        <Separator/>
-                                        <MenuItem Header="Delete" Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                                    </ContextMenu>
-                                </StackPanel.ContextMenu>
-                                <TextBlock Text="[E] " Foreground="Blue"/>
-                                <TextBlock>
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource SaveNodeItemToStringConverter}">
-                                            <Binding Path="Title"/>
-                                            <Binding Path="Items"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </StackPanel>
-                        </HierarchicalDataTemplate>
-                    </TreeView.Resources>
-                </TreeView>
-            </DockPanel>
-            
-            <GridSplitter HorizontalAlignment="Center" Width="3" Grid.Column="1"/>
-            <ContentControl Grid.Column="2" Margin="5" Content="{Binding SelectedItem}">
-                <ContentControl.Resources>
-                    <DataTemplate DataType="{x:Type model:SaveEntityModel}">
-                        <DockPanel>
-                            <Grid DockPanel.Dock="Top">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="0" Content="Entity name:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="1" Content="Root:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" Content="NeedTransform:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="3" Content="WasPlacedInLevel:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="4" Content="Position:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="5" Content="Rotation:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="6" Content="Scale:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="7" Content="ParentObjectName:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="8" Content="ParentObjectRoot:"/>
-
-                                <TextBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="400" Grid.Column="1" Grid.Row="0" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, Delay=250}"/>
-                                <TextBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="400" Grid.Column="1" Grid.Row="1" Text="{Binding RootObject}" IsEnabled="False"/>
-                                <CheckBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="80" Grid.Column="1" Grid.Row="2" IsChecked="{Binding NeedTransform}" IsEnabled="False"/>
-                                <CheckBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="80" Grid.Column="1" Grid.Row="3" IsChecked="{Binding WasPlacedInLevel}" IsEnabled="False"/>
-                                <control:Vector3Control Margin="0,2,0,2" Grid.Column="1" Grid.Row="4" Vector="{Binding Position}"/>
-                                <control:Vector4Control Margin="0,2,0,2" Grid.Column="1" Grid.Row="5" Vector="{Binding Rotation}"/>
-                                <control:Vector3Control Margin="0,2,0,2" Grid.Column="1" Grid.Row="6" Vector="{Binding Scale}"/>
-                                <TextBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="400" Grid.Column="1" Grid.Row="7" Text="{Binding ParentObjectName}" IsEnabled="False"/>
-                                <TextBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="400" Grid.Column="1" Grid.Row="8" Text="{Binding ParentObjectRoot}" IsEnabled="False"/>
-                            </Grid>
-                            <control:PropertiesControl Properties="{Binding Fields}" AddPropertyCommand="{Binding AddPropertyCommand}" RemovePropertyCommand="{Binding RemovePropertyCommand}"/>
-                        </DockPanel>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type model:SaveComponentModel}">
-                        <DockPanel>
-                            <Grid DockPanel.Dock="Top">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="0" Content="Component name:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="1" Content="Root:"/>
-                                <Label Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" Content="ParentEntityName:"/>
-
-                                <TextBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="400" Grid.Column="1" Grid.Row="0" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, Delay=250}"/>
-                                <TextBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="400" Grid.Column="1" Grid.Row="1" Text="{Binding RootObject}" IsEnabled="False"/>
-                                <TextBox Margin="20,2,0,2" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="400" Grid.Column="1" Grid.Row="2" Text="{Binding ParentEntityName}" IsEnabled="False"/>
-                            </Grid>
-                            <control:PropertiesControl Properties="{Binding Fields}" AddPropertyCommand="{Binding AddPropertyCommand}" RemovePropertyCommand="{Binding RemovePropertyCommand}"/>
-                        </DockPanel>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type model:SaveObjectModel}"/>
-                    <DataTemplate DataType="{x:Type model:SaveRootModel}">
+            <!-- ============================================================
+                 左カラム: 検索バー + ツリービュー カード
+                 ============================================================ -->
+            <Border Grid.Column="0" Style="{StaticResource Card}" Padding="0">
+                <DockPanel>
+                    <!-- 検索バー (カード内アンダーライン区切り) -->
+                    <Border DockPanel.Dock="Top"
+                            BorderBrush="{DynamicResource Brush.Divider}"
+                            BorderThickness="0,0,0,1"
+                            Padding="12,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                            <TextBox x:Name="SearchTermTextBox"
+                                     Grid.Column="0"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     VerticalContentAlignment="Center" />
 
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="0" Content="Header version:"/>
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="1" Content="Save version:"/>
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="2" Content="Build version:"/>
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="3" Content="Map name:"/>
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="4" Content="Map options"/>
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="5" Content="Session name:"/>
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="6" Content="Session visibility:" Visibility="{Binding HasSessionVisibility, Converter={StaticResource BoolToVis}}"/>
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="7" Content="Save creation time:"/>
-                            <Label Margin="0,3" Grid.Column="0" Grid.Row="8" Content="Play duration:"/>
+                            <!-- プレースホルダー (テキスト空時のみ可視) -->
+                            <TextBlock Grid.Column="0"
+                                       Margin="14,0,0,0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       IsHitTestVisible="False"
+                                       Foreground="{DynamicResource Brush.FG3}"
+                                       Text="{loc:Tr Key=MainSearchPlaceholder}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=SearchTermTextBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
 
-                            <TextBox Margin="0,3" Grid.Column="1" Grid.Row="0" VerticalContentAlignment="Center" Text="{Binding HeaderVersion, Mode=OneWay}" IsEnabled="False"/>
-                            <TextBox Margin="0,3" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" Text="{Binding SaveVersion, Mode=OneWay}" IsEnabled="False"/>
-                            <TextBox Margin="0,3" Grid.Column="1" Grid.Row="2" VerticalContentAlignment="Center" Text="{Binding BuildVersion}" />
-                            <TextBox Margin="0,3" Grid.Column="1" Grid.Row="3" VerticalContentAlignment="Center" Text="{Binding MapName}"/>
-                            <TextBox Margin="0,3" Grid.Column="1" Grid.Row="4" VerticalContentAlignment="Center" Text="{Binding MapOptions}"/>
-                            <TextBox Margin="0,3" Grid.Column="1" Grid.Row="5" VerticalContentAlignment="Center" Text="{Binding SessionName}"/>
-                            <ComboBox Margin="0,3" Grid.Column="1" Grid.Row="6" VerticalContentAlignment="Center" SelectedItem="{Binding SessionVisibility}" ItemsSource="{Binding Source={StaticResource ESessionVisibilityEnum}}" Visibility="{Binding HasSessionVisibility, Converter={StaticResource BoolToVis}}"/>
-                            <TextBox Margin="0,3" Grid.Column="1" Grid.Row="7" VerticalContentAlignment="Center" Text="{Binding SaveDateTime}"/>
-                            <TextBox Margin="0,3" Grid.Column="1" Grid.Row="8" VerticalContentAlignment="Center" Text="{Binding PlayDuration}"/>
+                            <!-- クリアボタン -->
+                            <Button Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    Width="24" Height="24"
+                                    Command="{Binding ResetSearchCommand}"
+                                    ToolTip="{loc:Tr Key=MainSearchClearTooltip}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource Button.Chrome}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=SearchTermTextBox}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Path Width="10" Height="10"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource Brush.FG2}"
+                                      StrokeThickness="1.8"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Data="M 0 0 L 10 10 M 10 0 L 0 10" />
+                            </Button>
                         </Grid>
-                    </DataTemplate>
-                </ContentControl.Resources>
-            </ContentControl>
-            <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Grid.RowSpan="1" Grid.ColumnSpan="3">
-                <Grid>
-                    <TextBlock Margin="0" TextWrapping="Wrap" Text="Please Wait..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF"/>
-                </Grid>
+                    </Border>
+
+                    <!-- ツリービュー -->
+                    <TreeView Name="SaveNodeTreeView"
+                              VirtualizingStackPanel.IsVirtualizing="True"
+                              VirtualizingStackPanel.VirtualizationMode="Recycling"
+                              ItemsSource="{Binding RootItem}"
+                              Padding="8">
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                                <EventSetter Event="Selected" Handler="TreeViewSelectedItemChanged" />
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                <Setter Property="ToolTip" Value="{Binding Type, Mode=OneTime, Converter={StaticResource TypeTooltipConverter}}" />
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectedItemChanged">
+                                <i:InvokeCommandAction Command="{Binding Source={StaticResource Proxy}, Path=Data.TreeSelectCommand}"
+                                                       CommandParameter="{Binding ElementName=SaveNodeTreeView, Path=SelectedItem}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                        <TreeView.Resources>
+                            <!-- Component ノード -->
+                            <HierarchicalDataTemplate DataType="{x:Type model:SaveComponentModel}" ItemsSource="{Binding Items}">
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{loc:Tr Key=CommonCopyName}" Command="{Binding CopyNameCommand}" />
+                                            <MenuItem Header="{loc:Tr Key=CommonCopyPath}" Command="{Binding CopyPathCommand}" />
+                                            <MenuItem Header="{loc:Tr Key=FillWindowTitle}" Command="{Binding FillInventoryCommand}" />
+                                            <MenuItem Header="{loc:Tr Key=CommonEmptyInventory}" Command="{Binding EmptyInventoryCommand}" />
+                                            <Separator />
+                                            <MenuItem Header="{loc:Tr Key=CommonDelete}"
+                                                      Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteCommand}"
+                                                      CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}" />
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
+                                    <Border Background="{DynamicResource Brush.Success}"
+                                            CornerRadius="3"
+                                            Padding="4,1"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="C"
+                                                   Foreground="{DynamicResource Brush.OnAccent}"
+                                                   FontSize="10"
+                                                   FontWeight="SemiBold" />
+                                    </Border>
+                                    <TextBlock VerticalAlignment="Center">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource SaveNodeItemToStringConverter}">
+                                                <Binding Path="Title" />
+                                                <Binding Path="Items" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    <TextBlock VerticalAlignment="Center"
+                                               Margin="6,0,0,0"
+                                               Foreground="{DynamicResource Brush.Accent}">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource SaveNodeInventoryToStringConverter}">
+                                                <Binding Path="Inventory" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+
+                            <!-- フォルダ（Object）ノード -->
+                            <HierarchicalDataTemplate DataType="{x:Type model:SaveObjectModel}" ItemsSource="{Binding Items}">
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{loc:Tr Key=CommonCopyName}" Command="{Binding CopyNameCommand}" />
+                                            <Separator />
+                                            <MenuItem Header="{loc:Tr Key=CommonAdd}">
+                                                <MenuItem Header="{loc:Tr Key=CommonEntity}" />
+                                                <MenuItem Header="{loc:Tr Key=CommonComponent}" />
+                                            </MenuItem>
+                                            <MenuItem Header="{loc:Tr Key=CommonDelete}"
+                                                      Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteCommand}"
+                                                      CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}" />
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
+                                    <Border Background="{DynamicResource Brush.AccentSubtle}"
+                                            CornerRadius="3"
+                                            Padding="4,1"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="O"
+                                                   Foreground="{DynamicResource Brush.Accent}"
+                                                   FontSize="10"
+                                                   FontWeight="SemiBold" />
+                                    </Border>
+                                    <TextBlock VerticalAlignment="Center">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource SaveNodeItemToStringConverter}">
+                                                <Binding Path="Title" />
+                                                <Binding Path="Items" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+
+                            <!-- Entity ノード -->
+                            <HierarchicalDataTemplate DataType="{x:Type model:SaveEntityModel}" ItemsSource="{Binding Items}">
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{loc:Tr Key=CommonCopyName}" Command="{Binding CopyNameCommand}" />
+                                            <MenuItem Header="{loc:Tr Key=CommonCopyPath}" Command="{Binding CopyPathCommand}" />
+                                            <Separator />
+                                            <MenuItem Header="{loc:Tr Key=CommonDelete}"
+                                                      Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteCommand}"
+                                                      CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}" />
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
+                                    <Border Background="{DynamicResource Brush.Accent}"
+                                            CornerRadius="3"
+                                            Padding="4,1"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="E"
+                                                   Foreground="{DynamicResource Brush.OnAccent}"
+                                                   FontSize="10"
+                                                   FontWeight="SemiBold" />
+                                    </Border>
+                                    <TextBlock VerticalAlignment="Center">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource SaveNodeItemToStringConverter}">
+                                                <Binding Path="Title" />
+                                                <Binding Path="Items" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+                        </TreeView.Resources>
+                    </TreeView>
+                </DockPanel>
             </Border>
 
+            <GridSplitter Grid.Column="1"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Width="6"
+                          Background="Transparent" />
+
+            <!-- ============================================================
+                 右カラム: 選択ノードのプロパティ（カード）
+                 ============================================================ -->
+            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="0">
+                <ContentControl Content="{Binding SelectedItem}" Margin="16">
+                    <ContentControl.Resources>
+
+                        <!-- ============ SaveEntity 詳細 ============ -->
+                        <DataTemplate DataType="{x:Type model:SaveEntityModel}">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                                    <TextBlock Style="{StaticResource Text.SubHeader}" Text="{loc:Tr Key=CommonEntity}" />
+                                    <TextBlock Style="{StaticResource Text.Caption}" Text="{loc:Tr Key=MainEntityHeader}" />
+                                </StackPanel>
+
+                                <Grid DockPanel.Dock="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" MinWidth="140" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{loc:Tr Key=MainEntityName}" />
+                                    <Label Grid.Row="1" Grid.Column="0" Content="{loc:Tr Key=CommonRoot}" />
+                                    <Label Grid.Row="2" Grid.Column="0" Content="{loc:Tr Key=MainNeedTransform}" />
+                                    <Label Grid.Row="3" Grid.Column="0" Content="{loc:Tr Key=MainWasPlacedInLevel}" />
+                                    <Label Grid.Row="4" Grid.Column="0" Content="{loc:Tr Key=MainPosition}" />
+                                    <Label Grid.Row="5" Grid.Column="0" Content="{loc:Tr Key=MainRotation}" />
+                                    <Label Grid.Row="6" Grid.Column="0" Content="{loc:Tr Key=MainScale}" />
+                                    <Label Grid.Row="7" Grid.Column="0" Content="{loc:Tr Key=MainParentObjectName}" />
+                                    <Label Grid.Row="8" Grid.Column="0" Content="{loc:Tr Key=MainParentObjectRoot}" />
+
+                                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,4" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, Delay=250}" />
+                                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,4" Text="{Binding RootObject}" IsEnabled="False" />
+                                    <CheckBox Grid.Row="2" Grid.Column="1" Margin="0,6" IsChecked="{Binding NeedTransform}" IsEnabled="False" />
+                                    <CheckBox Grid.Row="3" Grid.Column="1" Margin="0,6" IsChecked="{Binding WasPlacedInLevel}" IsEnabled="False" />
+                                    <control:Vector3Control Grid.Row="4" Grid.Column="1" Margin="0,4" Vector="{Binding Position}" />
+                                    <control:Vector4Control Grid.Row="5" Grid.Column="1" Margin="0,4" Vector="{Binding Rotation}" />
+                                    <control:Vector3Control Grid.Row="6" Grid.Column="1" Margin="0,4" Vector="{Binding Scale}" />
+                                    <TextBox Grid.Row="7" Grid.Column="1" Margin="0,4" Text="{Binding ParentObjectName}" IsEnabled="False" />
+                                    <TextBox Grid.Row="8" Grid.Column="1" Margin="0,4" Text="{Binding ParentObjectRoot}" IsEnabled="False" />
+                                </Grid>
+
+                                <control:PropertiesControl Margin="0,16,0,0"
+                                                            Properties="{Binding Fields}"
+                                                            AddPropertyCommand="{Binding AddPropertyCommand}"
+                                                            RemovePropertyCommand="{Binding RemovePropertyCommand}" />
+                            </DockPanel>
+                        </DataTemplate>
+
+                        <!-- ============ SaveComponent 詳細 ============ -->
+                        <DataTemplate DataType="{x:Type model:SaveComponentModel}">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                                    <TextBlock Style="{StaticResource Text.SubHeader}" Text="{loc:Tr Key=CommonComponent}" />
+                                    <TextBlock Style="{StaticResource Text.Caption}" Text="{loc:Tr Key=MainComponentHeader}" />
+                                </StackPanel>
+
+                                <Grid DockPanel.Dock="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" MinWidth="140" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{loc:Tr Key=MainComponentName}" />
+                                    <Label Grid.Row="1" Grid.Column="0" Content="{loc:Tr Key=CommonRoot}" />
+                                    <Label Grid.Row="2" Grid.Column="0" Content="{loc:Tr Key=MainParentEntityName}" />
+
+                                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,4" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, Delay=250}" />
+                                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,4" Text="{Binding RootObject}" IsEnabled="False" />
+                                    <TextBox Grid.Row="2" Grid.Column="1" Margin="0,4" Text="{Binding ParentEntityName}" IsEnabled="False" />
+                                </Grid>
+
+                                <control:PropertiesControl Margin="0,16,0,0"
+                                                            Properties="{Binding Fields}"
+                                                            AddPropertyCommand="{Binding AddPropertyCommand}"
+                                                            RemovePropertyCommand="{Binding RemovePropertyCommand}" />
+                            </DockPanel>
+                        </DataTemplate>
+
+                        <!-- SaveObject ノードはコンテナのみなのでテンプレート不要 -->
+                        <DataTemplate DataType="{x:Type model:SaveObjectModel}" />
+
+                        <!-- ============ SaveRoot 詳細（セーブヘッダ） ============ -->
+                        <DataTemplate DataType="{x:Type model:SaveRootModel}">
+                            <StackPanel>
+                                <StackPanel Margin="0,0,0,16">
+                                    <TextBlock Style="{StaticResource Text.SubHeader}" Text="{loc:Tr Key=MainSaveMetadataTitle}" />
+                                    <TextBlock Style="{StaticResource Text.Caption}" Text="{loc:Tr Key=MainSaveMetadataSubtitle}" />
+                                </StackPanel>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" MinWidth="140" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{loc:Tr Key=MainHeaderVersion}" />
+                                    <Label Grid.Row="1" Grid.Column="0" Content="{loc:Tr Key=MainSaveVersion}" />
+                                    <Label Grid.Row="2" Grid.Column="0" Content="{loc:Tr Key=MainBuildVersion}" />
+                                    <Label Grid.Row="3" Grid.Column="0" Content="{loc:Tr Key=MainMapName}" />
+                                    <Label Grid.Row="4" Grid.Column="0" Content="{loc:Tr Key=MainMapOptions}" />
+                                    <Label Grid.Row="5" Grid.Column="0" Content="{loc:Tr Key=MainSessionName}" />
+                                    <Label Grid.Row="6" Grid.Column="0" Content="{loc:Tr Key=MainSessionVisibility}"
+                                           Visibility="{Binding HasSessionVisibility, Converter={StaticResource BoolToVis}}" />
+                                    <Label Grid.Row="7" Grid.Column="0" Content="{loc:Tr Key=MainSaveCreationTime}" />
+                                    <Label Grid.Row="8" Grid.Column="0" Content="{loc:Tr Key=MainPlayDuration}" />
+
+                                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,4" Text="{Binding HeaderVersion, Mode=OneWay}" IsEnabled="False" />
+                                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,4" Text="{Binding SaveVersion, Mode=OneWay}" IsEnabled="False" />
+                                    <TextBox Grid.Row="2" Grid.Column="1" Margin="0,4" Text="{Binding BuildVersion}" />
+                                    <TextBox Grid.Row="3" Grid.Column="1" Margin="0,4" Text="{Binding MapName}" />
+                                    <TextBox Grid.Row="4" Grid.Column="1" Margin="0,4" Text="{Binding MapOptions}" />
+                                    <TextBox Grid.Row="5" Grid.Column="1" Margin="0,4" Text="{Binding SessionName}" />
+                                    <ComboBox Grid.Row="6" Grid.Column="1" Margin="0,4"
+                                              SelectedItem="{Binding SessionVisibility}"
+                                              ItemsSource="{Binding Source={StaticResource ESessionVisibilityEnum}}"
+                                              Visibility="{Binding HasSessionVisibility, Converter={StaticResource BoolToVis}}" />
+                                    <TextBox Grid.Row="7" Grid.Column="1" Margin="0,4" Text="{Binding SaveDateTime}" />
+                                    <TextBox Grid.Row="8" Grid.Column="1" Margin="0,4" Text="{Binding PlayDuration}" />
+                                </Grid>
+                            </StackPanel>
+                        </DataTemplate>
+
+                    </ContentControl.Resources>
+                </ContentControl>
+            </Border>
+
+            <!-- ============================================================
+                 「Please wait...」 オーバーレイ (IsBusy 時に全カラムを覆う)
+                 ============================================================ -->
+            <Border Grid.Column="0" Grid.ColumnSpan="3"
+                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"
+                    Background="#CC000000"
+                    CornerRadius="{StaticResource Radius.Card}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="{loc:Tr Key=CommonPleaseWait}"
+                               FontSize="22"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource Brush.FG1}" />
+                    <TextBlock Text="{loc:Tr Key=MainLoadingSaveFile}"
+                               Style="{StaticResource Text.Caption}"
+                               HorizontalAlignment="Center"
+                               Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
         </Grid>
     </DockPanel>
 </Window>

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SatisfactorySaveEditor/SatisfactorySaveEditor.csproj" />
+  <Project Path="SatisfactorySaveParser/SatisfactorySaveParser.csproj" />
+  <Project Path="SatisfactorySaveParser.Tests/SatisfactorySaveParser.Tests.csproj" />
+  <Project Path="SourceCodeMessage/SourceCodeMessage.csproj" />
+</Solution>

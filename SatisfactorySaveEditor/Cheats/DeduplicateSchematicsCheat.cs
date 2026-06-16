@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 
 using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel.Property;
 
 using SatisfactorySaveParser;
@@ -38,14 +39,14 @@ namespace SatisfactorySaveEditor.Cheats
                 }
             }
 
-            MessageBox.Show($"Removed {removed} duplicate schematics.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(string.Format(Resources.MsgDuplicateSchematicsRemoved_Body, removed), Resources.MsgSuccess_Title, MessageBoxButton.OK, MessageBoxImage.Information);
 
             return true;
         }
 
         private void MissingTagMsg(string tagName)
         {
-            MessageBox.Show($"This save does not contain a {tagName}.\nThis means that the loaded save is probably corrupt. Aborting.", "Cannot find " + tagName, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(string.Format(Resources.MsgSaveMissingSubsystem_Body, tagName), string.Format(Resources.MsgCannotFindSubsystem_Title, tagName), MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

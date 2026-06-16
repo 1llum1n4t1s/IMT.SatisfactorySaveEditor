@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.View;
 using SatisfactorySaveEditor.ViewModel;
 using SatisfactorySaveEditor.ViewModel.Property;
@@ -30,7 +31,7 @@ namespace SatisfactorySaveEditor.Cheats
             var sinkSubsystem = rootItem.FindChild("Persistent_Level:PersistentLevel.ResourceSinkSubsystem", false);
             if (sinkSubsystem == null)
             {
-                MessageBox.Show("This save does not contain a ResourceSinkSubsystem.\nThis means that the loaded save is probably corrupt. Aborting.", "Cannot find ResourceSinkSubsystem", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoResourceSinkSubsystem_Body, Resources.MsgNoResourceSinkSubsystem_Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
@@ -42,10 +43,10 @@ namespace SatisfactorySaveEditor.Cheats
                 Owner = Application.Current.MainWindow
             };
             var cvm = (StringPromptViewModel)dialog.DataContext;
-            cvm.WindowTitle = "Enter earned ticket count";
-            cvm.PromptMessage = "Tickets";
+            cvm.WindowTitle = Resources.PromptCoupon_Title;
+            cvm.PromptMessage = Resources.PromptCoupon_Caption;
             cvm.ValueChosen = "0";
-            cvm.OldValueMessage = $"Sets the AWESOME Sink ticket prices as if you had earned N tickets.\nFor example, entering 0 sets the price for the next ticket back to 1,000\nCurrent tickets earned: {mCurrentPointLevel.Value}\nMore info on AWESOME Sink wiki page";
+            cvm.OldValueMessage = string.Format(Resources.PromptCoupon_Detail, mCurrentPointLevel.Value);
             dialog.ShowDialog();
 
             int requestedTicketCount = 0;
@@ -56,12 +57,12 @@ namespace SatisfactorySaveEditor.Cheats
 
                 if (requestedTicketCount < 0)
                 {
-                    MessageBox.Show("You must enter a number greater than 0.", "Ticket count unchanged.", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Resources.MsgCouponMustBePositive_Body, Resources.MsgCouponUnchanged_Body, MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
                 else if (requestedTicketCount > 288100000)
                 {
-                    MessageBox.Show("The highest ticket count supported is about 288,100,000, since the highest supported points per ticket is around 9,223,372,036,854,775,807 (int64 max value)", "That's a lot of tickets!");
+                    MessageBox.Show(Resources.MsgCouponMaxExceeded_Body, Resources.MsgCouponMaxExceeded_Title);
                     return false;
                 }
 
@@ -71,7 +72,7 @@ namespace SatisfactorySaveEditor.Cheats
 
                 long calculatedPointsCount = pointsRequiredFromTicketCount(requestedTicketCount);
 
-                MessageBox.Show($"Earned ticket count set to {requestedTicketCount}.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(string.Format(Resources.MsgCouponSet_Body, requestedTicketCount), Resources.MsgSuccess_Title, MessageBoxButton.OK, MessageBoxImage.Information);
                 //MessageBox.Show($"Ticket count set to {requestedTicketCount}. The next ticket will take {calculatedPointsCount} points to earn.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 return true;
             }
@@ -79,7 +80,7 @@ namespace SatisfactorySaveEditor.Cheats
             {
                 if (!(cvm.ValueChosen == "cancel"))
                 {
-                    MessageBox.Show($"Could not parse: {cvm.ValueChosen}");
+                    MessageBox.Show(string.Format(Resources.MsgCouldNotParse_Body, cvm.ValueChosen));
                 }
                 return false;
             }

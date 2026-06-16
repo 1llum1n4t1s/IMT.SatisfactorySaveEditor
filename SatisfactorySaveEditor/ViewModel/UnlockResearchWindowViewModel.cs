@@ -3,12 +3,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace SatisfactorySaveEditor.ViewModel
 {
-    public class UnlockResearchWindowViewModel : ViewModelBase
+    public class UnlockResearchWindowViewModel : ObservableObject
     {
         public RelayCommand<Window> OkCommand { get; }
         public RelayCommand<Window> CancelCommand { get; }
@@ -23,14 +23,14 @@ namespace SatisfactorySaveEditor.ViewModel
         public ObservableCollection<string> Available
         {
             get => available;
-            set { Set(() => Available, ref available, value); }
+            set { SetProperty(ref available, value, nameof(Available)); }
         }
 
         private ObservableCollection<string> unlocked;
         public ObservableCollection<string> Unlocked
         {
             get => unlocked;
-            set { Set(() => Unlocked, ref unlocked, value); }
+            set { SetProperty(ref unlocked, value, nameof(Unlocked)); }
         }
 
         public UnlockResearchWindowViewModel()

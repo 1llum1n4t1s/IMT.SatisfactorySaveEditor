@@ -1,5 +1,4 @@
-﻿using NLog;
-using SatisfactorySaveParser.Structures;
+﻿using SatisfactorySaveParser.Structures;
 using System.Collections.Generic;
 using System.IO;
 

@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.View;
 using SatisfactorySaveEditor.ViewModel;
 using SatisfactorySaveEditor.ViewModel.Property;
@@ -35,12 +36,12 @@ namespace SatisfactorySaveEditor.Cheats
 
             if (cvm.NumberChosen < 0 || cvm.NumberChosen == numAdditionalSlots.Value)
             {
-                MessageBox.Show("Inventory slot count unchanged", "Unchanged", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Resources.MsgInventorySlotsUnchanged_Body, Resources.MsgUnchanged_Title, MessageBoxButton.OK, MessageBoxImage.Information);
                 return false;
             }
 
             numAdditionalSlots.Value = cvm.NumberChosen;
-            MessageBox.Show($"Inventory slot count set to {cvm.NumberChosen} slots.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(string.Format(Resources.MsgInventorySlotsSet_Body, cvm.NumberChosen), Resources.MsgSuccess_Title, MessageBoxButton.OK, MessageBoxImage.Information);
             return true;
         }
     }

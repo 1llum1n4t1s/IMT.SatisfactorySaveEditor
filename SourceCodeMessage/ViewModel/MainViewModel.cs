@@ -1,10 +1,11 @@
+using System.Diagnostics;
 using System.Windows;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace SourceCodeMessage.ViewModel
 {
-    public class MainViewModel : ViewModelBase
+    public class MainViewModel : ObservableObject
     {
         public RelayCommand<Window> OpenReleasesCommand { get; }
         public RelayCommand<Window> CloseCommand { get; }
@@ -18,7 +19,7 @@ namespace SourceCodeMessage.ViewModel
         private void OpenReleases(Window obj)
         {
             //Robb, Goz3rr, and virusek20 have the login info for this bit.ly account if needed
-            System.Diagnostics.Process.Start("http://bit.ly/SSE_Wrong_Download");
+            Process.Start(new ProcessStartInfo("http://bit.ly/SSE_Wrong_Download") { UseShellExecute = true });
             Application.Current.Shutdown();
         }
 

@@ -1,4 +1,5 @@
 ﻿using SatisfactorySaveEditor.Model;
+using SatisfactorySaveEditor.Properties;
 using SatisfactorySaveEditor.ViewModel.Property;
 
 using SatisfactorySaveParser;
@@ -16,14 +17,14 @@ namespace SatisfactorySaveEditor.Cheats
             var gameState = rootItem.FindChild("Persistent_Level:PersistentLevel.UnlockSubsystem", false);
             if (gameState == null)
             {
-                MessageBox.Show("This save does not contain an UnlockSubsystem.\nThis means that the loaded save is probably corrupt. Aborting.", "Cannot find UnlockSubsystem", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resources.MsgNoUnlockSubsystemMap_Body, "Cannot find UnlockSubsystem", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
             var isMapUnlocked = gameState.FindOrCreateField<BoolPropertyViewModel>("mIsMapUnlocked");
             isMapUnlocked.Value = true;
 
-            MessageBox.Show("Map unlocked", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Resources.MsgMapUnlocked_Body, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             return true;
         }
     }

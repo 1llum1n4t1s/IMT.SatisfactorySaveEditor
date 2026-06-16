@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace SatisfactorySaveEditor.Util
 {
@@ -13,47 +12,39 @@ namespace SatisfactorySaveEditor.Util
     {
         private const string ReleasesEndpoint = "https://api.github.com/repos/Goz3rr/SatisfactorySaveEditor/releases";
 
+        private static readonly HttpClient httpClient = CreateHttpClient();
+
+        private static HttpClient CreateHttpClient()
+        {
+            var client = new HttpClient();
+            // GitHub API は User-Agent ヘッダーを必須とする
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("SatisfactorySaveEditor");
+            return client;
+        }
+
         public static async Task<VersionInfo> GetLatestReleaseInfo()
         {
-            var json = await GetLatestReleaseInfoJSON();
-            var versions = JsonConvert.DeserializeObject<IList<VersionInfo>>(json);
-            return versions.FirstOrDefault();
-        }
-
-        private static async Task<string> GetLatestReleaseInfoJSON()
-        {
-            return await GetHttpResponseAsync(ReleasesEndpoint);
-        }
-        private static async Task<string> GetHttpResponseAsync(string url)
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "SatisfactorySaveEditor";
-            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
-            using(HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using(Stream stream = response.GetResponseStream())
-            using(StreamReader reader = new StreamReader(stream))
-            {
-                return await reader.ReadToEndAsync();
-            }
+            var json = await httpClient.GetStringAsync(ReleasesEndpoint);
+            var versions = JsonSerializer.Deserialize<IList<VersionInfo>>(json);
+            return versions != null && versions.Count > 0 ? versions[0] : null;
         }
 
         public class VersionInfo
         {
-            [JsonProperty(PropertyName = "html_url")]
-            public string ReleaseUrl;
+            [JsonPropertyName("html_url")]
+            public string ReleaseUrl { get; set; }
 
-            [JsonProperty(PropertyName = "tag_name")]
-            public string TagName;
+            [JsonPropertyName("tag_name")]
+            public string TagName { get; set; }
 
-            [JsonProperty(PropertyName = "name")]
-            public string Name;
+            [JsonPropertyName("name")]
+            public string Name { get; set; }
 
-            [JsonProperty(PropertyName = "body")]
-            public string Changelog;
+            [JsonPropertyName("body")]
+            public string Changelog { get; set; }
 
-            [JsonProperty(PropertyName = "published_at")]
-            public DateTime ReleaseDateTime;
+            [JsonPropertyName("published_at")]
+            public DateTime ReleaseDateTime { get; set; }
 
             public bool IsNewer()
             {
