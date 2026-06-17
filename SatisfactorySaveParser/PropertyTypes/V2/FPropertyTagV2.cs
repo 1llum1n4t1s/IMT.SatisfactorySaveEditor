@@ -42,7 +42,11 @@ namespace SatisfactorySaveParser.PropertyTypes.V2
                 tag.Index = reader.ReadInt32();
 
             if (tag.HasGuid)
+            {
                 tag.PropertyGuid = reader.ReadBytes(16);
+                if (tag.PropertyGuid.Length != 16)
+                    throw new InvalidDataException($"PropertyTag '{tag.Name}' truncated: expected 16-byte GUID, got {tag.PropertyGuid.Length}");
+            }
 
             return tag;
         }

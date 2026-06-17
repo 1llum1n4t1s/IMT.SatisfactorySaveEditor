@@ -138,7 +138,11 @@ namespace SatisfactorySaveParser.Save
 
                 writer.Write(HasSaveDataHash ? 1 : 0);
                 if (HasSaveDataHash)
+                {
+                    if (SaveDataHash == null || SaveDataHash.Length != 16)
+                        throw new InvalidDataException($"HasSaveDataHash=true だが SaveDataHash が 16byte ではありません（Length={(SaveDataHash == null ? "null" : SaveDataHash.Length.ToString())}）");
                     writer.Write(SaveDataHash);
+                }
             }
 
             if (HeaderVersion >= SaveHeaderVersion.AddedCreativeMode)

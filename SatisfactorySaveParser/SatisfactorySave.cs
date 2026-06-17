@@ -109,9 +109,13 @@ namespace SatisfactorySaveParser
                 {
                     var magic = reader.ReadInt32();
                     Trace.Assert(magic == unchecked((int)ChunkInfo.Magic));
-                    reader.ReadInt32();   // marker 0x22222222
+                    var marker = reader.ReadInt32();   // marker 0x22222222
+                    if (marker != ChunkInfo.NewFormatMarker)
+                        throw new InvalidDataException($"Unexpected chunk marker 0x{marker:X8} (expected 0x{ChunkInfo.NewFormatMarker:X8})");
                     reader.ReadInt64();   // maxChunkSize (131072)
-                    reader.ReadByte();    // compressor algorithm (3 = zlib)
+                    var compressorAlgo = reader.ReadByte();    // compressor algorithm (3 = zlib)
+                    if (compressorAlgo != ChunkInfo.CompressorZlib)
+                        throw new InvalidDataException($"Unsupported chunk compressor algorithm {compressorAlgo} (expected {ChunkInfo.CompressorZlib} = zlib)");
                     compressedSize = reader.ReadInt64();
                     reader.ReadInt64();   // uncompressedSize
                     reader.ReadInt64();   // compressedSize (繰り返し)

@@ -596,13 +596,13 @@ namespace SatisfactorySaveEditor.ViewModel
                 Components = new System.Collections.Generic.List<SatisfactorySaveParser.Structures.ObjectReference>(src.Components),
             };
 
-            // Vector はクラス＝共有回避のため必ず new する（共有すると原本も動く）。
+            // Vector はクラス＝共有回避のため必ず new する（共有すると原本も動く）。未設定（null）なら複製側も未設定のまま。
             var r = src.Rotation;
-            clone.Rotation = new SatisfactorySaveParser.Structures.Vector4 { X = r.X, Y = r.Y, Z = r.Z, W = r.W };
+            if (r != null) clone.Rotation = new SatisfactorySaveParser.Structures.Vector4 { X = r.X, Y = r.Y, Z = r.Z, W = r.W };
             var s = src.Scale;
-            clone.Scale = new SatisfactorySaveParser.Structures.Vector3 { X = s.X, Y = s.Y, Z = s.Z };
+            if (s != null) clone.Scale = new SatisfactorySaveParser.Structures.Vector3 { X = s.X, Y = s.Y, Z = s.Z };
             var p = src.Position;
-            clone.Position = new SatisfactorySaveParser.Structures.Vector3 { X = p.X + offsetXcm, Y = p.Y, Z = p.Z };
+            if (p != null) clone.Position = new SatisfactorySaveParser.Structures.Vector3 { X = p.X + offsetXcm, Y = p.Y, Z = p.Z };
 
             // パーサ Entries に追加（保存の真実）。
             saveGame.Entries.Add(clone);

@@ -16,8 +16,8 @@ namespace SatisfactorySaveParser.Tests
     [TestClass]
     public class MapExport
     {
-        private const string OutPath = @"C:\Users\IMT\AppData\Local\Temp\map_points.json";
-        private const string CountPath = @"C:\Users\IMT\AppData\Local\Temp\map_counts.txt";
+        private static readonly string OutPath = Path.Combine(Path.GetTempPath(), "map_points.json");
+        private static readonly string CountPath = Path.Combine(Path.GetTempPath(), "map_counts.txt");
 
         private static readonly string[] CatNames =
         {
@@ -63,7 +63,7 @@ namespace SatisfactorySaveParser.Tests
         public void ExportPoints()
         {
             var sample = FindSample();
-            Assert.IsNotNull(sample, "サンプルが見つからない");
+            if (sample == null) { Assert.Inconclusive("ローカルにサンプル .sav が無いためスキップ（非ハーメチック・明示フィルタ実行用）"); return; }
             var save = new SatisfactorySave(sample);
 
             // 重要カテゴリは細かく(3m)、物量の多い雑多カテゴリは粗く(8m)デデュープ。座標出力はメートル単位。

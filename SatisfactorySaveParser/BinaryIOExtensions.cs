@@ -11,13 +11,22 @@ namespace SatisfactorySaveParser
         public static char[] ReadCharArray(this BinaryReader reader)
         {
             var count = reader.ReadInt32();
+            // 不正オフセット（1.0 フレーミング走査・3D 接続オーバーレイ等）で巨大な count を読んだとき、
+            // ReadChars/ReadBytes が確保前に OOM/ハングしないよう残ストリーム長で上限検証する。
+            // 正当な長さ前置文字列は必ずストリーム内に収まるのでこの分岐は発火せず、round-trip も不変。
+            var remaining = reader.BaseStream.Length - reader.BaseStream.Position;
             if (count >= 0)
             {
+                if (count > remaining)
+                    throw new InvalidDataException($"String length {count} exceeds remaining stream {remaining}");
                 return reader.ReadChars(count);
             }
             else
             {
-                var bytes = reader.ReadBytes(count * -2);
+                long byteCount = -(long)count * 2;
+                if (byteCount > remaining)
+                    throw new InvalidDataException($"UTF-16 string length {count} exceeds remaining stream {remaining}");
+                var bytes = reader.ReadBytes((int)byteCount);
                 return Encoding.Unicode.GetChars(bytes);
             }
         }

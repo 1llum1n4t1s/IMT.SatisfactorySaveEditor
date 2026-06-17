@@ -19,6 +19,8 @@ namespace SatisfactorySaveParser.PropertyTypes.V2
                 Name = reader.ReadLengthPrefixedString()
             };
             var count = reader.ReadInt32();
+            if (count < 0)
+                throw new InvalidDataException($"FPropertyTagNode '{node.Name}' child count {count} is negative");
             for (var i = 0; i < count; i++)
                 node.Children.Add(Read(reader));
             return node;

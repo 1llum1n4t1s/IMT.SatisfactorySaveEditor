@@ -19,7 +19,7 @@ namespace SatisfactorySaveParser.Tests
     [TestClass]
     public class V2FramingAnalysis
     {
-        private const string ReportPath = @"C:\Users\IMT\AppData\Local\Temp\v2_framing_report.txt";
+        private static readonly string ReportPath = Path.Combine(Path.GetTempPath(), "v2_framing_report.txt");
 
         private static string FindSample()
         {

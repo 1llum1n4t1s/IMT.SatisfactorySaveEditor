@@ -52,6 +52,12 @@
   <data name="Menu3DView" xml:space="preserve">
     <value>_3D View</value>
   </data>
+  <data name="World3DTitle" xml:space="preserve">
+    <value>3D World View — Satisfactory Save Editor</value>
+  </data>
+  <data name="World3DControlsHelp" xml:space="preserve">
+    <value>WASD=Move / Q·Z=Up·Down / Right-drag=Rotate / Wheel=Zoom / Left-click=Select / Delete=Delete / Ctrl+D=Duplicate</value>
+  </data>
   <data name="Msg3DNoSave_Body" xml:space="preserve">
     <value>Open a save file first to view it in 3D.</value>
   </data>

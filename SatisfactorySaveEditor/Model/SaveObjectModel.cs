@@ -258,9 +258,12 @@ namespace SatisfactorySaveEditor.Model
 
         public virtual bool MatchesFilter(string filter)
         {
-            // 人間可読ラベル（例「conveyor」「constructor」）でも引けるようにする。
+            // フレンドリー名・生クラスパス(Title)・インスタンス名のいずれでも引けるようにする。
             // .NET 10 の StringComparison.OrdinalIgnoreCase でアロケーションフリーに大小無視比較する。
             if (DisplayName != null && DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (Title != null && Title.Contains(filter, StringComparison.OrdinalIgnoreCase))
                 return true;
 
             return this.Model?.InstanceName?.Contains(filter, StringComparison.OrdinalIgnoreCase) ?? false;
