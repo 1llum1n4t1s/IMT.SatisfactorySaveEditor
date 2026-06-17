@@ -15,7 +15,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class UndoDeleteEnemiesCheat : ICheat
     {
-        public string Name => "Undo Delete enemies";
+        public string NameKey => "CheatUndoDeleteEnemies";
 
         private SaveObjectModel FindOrCreatePath(SaveObjectModel start, string[] path, int index = 0)
         {

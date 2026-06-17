@@ -11,7 +11,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class CrateSummonCheat : ICheat
     {
-        public string Name => "Teleport crates to host player";
+        public string NameKey => "CheatTeleportCrates";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

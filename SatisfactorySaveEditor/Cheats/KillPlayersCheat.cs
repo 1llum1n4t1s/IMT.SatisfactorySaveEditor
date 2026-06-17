@@ -11,7 +11,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class KillPlayersCheat : ICheat
     {
-        public string Name => "Kill dummy players";
+        public string NameKey => "CheatKillDummyPlayers";
 
         private int GetNextStorageID(int currentId, SaveObjectModel rootItem)
         {

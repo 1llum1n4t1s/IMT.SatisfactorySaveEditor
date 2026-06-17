@@ -12,7 +12,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class ArmSlotsCheat : ICheat
     {
-        public string Name => "Set arm slot count...";
+        public string NameKey => "CheatArmSlots";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

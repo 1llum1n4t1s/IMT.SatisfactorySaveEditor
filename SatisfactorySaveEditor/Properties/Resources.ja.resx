@@ -337,6 +337,9 @@
   <data name="ButtonDone" xml:space="preserve">
     <value>完了(_D)</value>
   </data>
+  <data name="ButtonHelp" xml:space="preserve">
+    <value>ヘルプ(_H)</value>
+  </data>
   <data name="MassDismantleTitle" xml:space="preserve">
     <value>一括削除</value>
   </data>
@@ -710,5 +713,59 @@ Persistent_Level:PersistentLevel.Char_Player_C_0.inventory</value>
   </data>
   <data name="MsgMapUnlocked_Body" xml:space="preserve">
     <value>マップを解放しました</value>
+  </data>
+  <data name="CheatUnlockResearch" xml:space="preserve">
+    <value>研究を解除</value>
+  </data>
+  <data name="CheatUnlockMap" xml:space="preserve">
+    <value>マップを解放</value>
+  </data>
+  <data name="CheatUncoverMap" xml:space="preserve">
+    <value>マップ全体を踏破...</value>
+  </data>
+  <data name="CheatInventorySlots" xml:space="preserve">
+    <value>インベントリスロット数を設定...</value>
+  </data>
+  <data name="CheatArmSlots" xml:space="preserve">
+    <value>アームスロット数を設定...</value>
+  </data>
+  <data name="CheatKillDummyPlayers" xml:space="preserve">
+    <value>ダミープレイヤーを削除</value>
+  </data>
+  <data name="CheatSetCoupons" xml:space="preserve">
+    <value>AWESOMEシンクのクーポン累計獲得数を設定...</value>
+  </data>
+  <data name="CheatDeleteEnemies" xml:space="preserve">
+    <value>敵を削除</value>
+  </data>
+  <data name="CheatUndoDeleteEnemies" xml:space="preserve">
+    <value>敵の削除を元に戻す</value>
+  </data>
+  <data name="CheatSpawnDoggos" xml:space="preserve">
+    <value>ロンリーロイをスポーン...</value>
+  </data>
+  <data name="CheatMassDismantle" xml:space="preserve">
+    <value>一括解体...</value>
+  </data>
+  <data name="CheatEverythingBox" xml:space="preserve">
+    <value>全アイテム入りクレートを作成...</value>
+  </data>
+  <data name="CheatTeleportCrates" xml:space="preserve">
+    <value>クレートをホストプレイヤーへテレポート</value>
+  </data>
+  <data name="CheatNoCost" xml:space="preserve">
+    <value>建設コストなしを切り替え</value>
+  </data>
+  <data name="CheatNoPowerCost" xml:space="preserve">
+    <value>電力コストなしを切り替え</value>
+  </data>
+  <data name="CheatRemoveSlugs" xml:space="preserve">
+    <value>パワースラグを除去</value>
+  </data>
+  <data name="CheatRestoreSlugs" xml:space="preserve">
+    <value>パワースラグを復元</value>
+  </data>
+  <data name="CheatDeduplicateSchematics" xml:space="preserve">
+    <value>スキマティックの重複を削除</value>
   </data>
 </root>

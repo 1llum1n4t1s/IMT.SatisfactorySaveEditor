@@ -14,7 +14,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class CouponChangerCheat : ICheat
     {
-        public string Name => "Set AWESOME sink coupons accumulated...";
+        public string NameKey => "CheatSetCoupons";
 
         private long pointsRequiredFromTicketCount(int tickets)
         {

@@ -7,7 +7,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class RestoreSlugsCheat : ICheat
     {
-        public string Name => "Restore slugs";
+        public string NameKey => "CheatRestoreSlugs";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

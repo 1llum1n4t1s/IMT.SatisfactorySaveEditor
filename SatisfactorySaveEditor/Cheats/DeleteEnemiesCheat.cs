@@ -17,7 +17,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class DeleteEnemiesCheat : ICheat
     {
-        public string Name => "Delete enemies";
+        public string NameKey => "CheatDeleteEnemies";
 
         private int currentDoggoID = 0;
 

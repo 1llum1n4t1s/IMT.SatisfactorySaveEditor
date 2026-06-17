@@ -200,13 +200,23 @@ namespace SatisfactorySaveEditor.ViewModel
         /// </summary>
         private void Open3DView()
         {
-            if (saveGame?.Entries == null || saveGame.Entries.Count == 0)
+            if (saveGame?.Entries == null || rootItem == null)
             {
                 MessageBox.Show(Resources.Msg3DNoSave_Body, Resources.Menu3DView, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var window = new World3DWindow(saveGame.Entries)
+            // 未保存のツリー編集（削除/複製）を反映するため、Save 時まで stale な saveGame.Entries ではなく
+            // 現在のツリー状態（Save の Entries 再構成と同じ rootItem.DescendantSelf）から構築する。
+            // これにより、削除済みアクターが 3D ビューに残って Ctrl+D でツリーに復活する不整合を防ぐ。
+            var currentObjects = rootItem.DescendantSelf.ToList();
+            if (currentObjects.Count == 0)
+            {
+                MessageBox.Show(Resources.Msg3DNoSave_Body, Resources.Menu3DView, MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var window = new World3DWindow(currentObjects)
             {
                 Owner = Application.Current.MainWindow
             };
@@ -272,7 +282,7 @@ namespace SatisfactorySaveEditor.ViewModel
         private void Cheat(ICheat cheat)
         {
             
-            log.Info($"Applying cheat {cheat.Name}");
+            log.Info($"Applying cheat {cheat.GetType().Name}");
 
             // 1.0+ セーブでは CollectedObjects が V2 ボディに書き出されないため、スラグ系チートは
             // 適用しても保存時に黙って失われる。「成功したのに反映されない」誤操作を避けるためブロックする。

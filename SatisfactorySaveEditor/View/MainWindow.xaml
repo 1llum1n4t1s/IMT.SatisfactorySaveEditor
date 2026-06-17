@@ -39,6 +39,7 @@
         <converter:TypeTooltipConverter x:Key="TypeTooltipConverter" />
         <converter:NodeTooltipConverter x:Key="NodeTooltipConverter" />
         <converter:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converter:CheatNameConverter x:Key="CheatNameConverter" />
         <ObjectDataProvider x:Key="ESessionVisibilityEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="save:ESessionVisibility" />
@@ -111,7 +112,14 @@
                     <MenuItem Header="{loc:Tr Key=MenuCheats}" ItemsSource="{Binding CheatMenuItems}">
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="{x:Type MenuItem}">
-                                <Setter Property="Header" Value="{Binding Path=Name}" />
+                                <Setter Property="Header">
+                                    <Setter.Value>
+                                        <MultiBinding Converter="{StaticResource CheatNameConverter}">
+                                            <Binding Path="NameKey" />
+                                            <Binding Path="CurrentCulture" Source="{x:Static loc:LocalizationService.Instance}" />
+                                        </MultiBinding>
+                                    </Setter.Value>
+                                </Setter>
                                 <Setter Property="Command" Value="{Binding DataContext.CheatCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type MenuItem}, AncestorLevel=1}}" />
                                 <Setter Property="CommandParameter" Value="{Binding}" />
                             </Style>

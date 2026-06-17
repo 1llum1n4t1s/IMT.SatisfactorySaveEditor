@@ -337,6 +337,9 @@
   <data name="ButtonDone" xml:space="preserve">
     <value>_Done</value>
   </data>
+  <data name="ButtonHelp" xml:space="preserve">
+    <value>_Help</value>
+  </data>
   <data name="MassDismantleTitle" xml:space="preserve">
     <value>Mass delete</value>
   </data>
@@ -710,5 +713,59 @@ This means that the loaded save is probably corrupt. Aborting.</value>
   </data>
   <data name="MsgMapUnlocked_Body" xml:space="preserve">
     <value>Map unlocked</value>
+  </data>
+  <data name="CheatUnlockResearch" xml:space="preserve">
+    <value>Unlock research</value>
+  </data>
+  <data name="CheatUnlockMap" xml:space="preserve">
+    <value>Unlock map</value>
+  </data>
+  <data name="CheatUncoverMap" xml:space="preserve">
+    <value>Uncover entire map...</value>
+  </data>
+  <data name="CheatInventorySlots" xml:space="preserve">
+    <value>Set inventory slot count...</value>
+  </data>
+  <data name="CheatArmSlots" xml:space="preserve">
+    <value>Set arm slot count...</value>
+  </data>
+  <data name="CheatKillDummyPlayers" xml:space="preserve">
+    <value>Kill dummy players</value>
+  </data>
+  <data name="CheatSetCoupons" xml:space="preserve">
+    <value>Set AWESOME Sink coupons accumulated...</value>
+  </data>
+  <data name="CheatDeleteEnemies" xml:space="preserve">
+    <value>Delete enemies</value>
+  </data>
+  <data name="CheatUndoDeleteEnemies" xml:space="preserve">
+    <value>Undo delete enemies</value>
+  </data>
+  <data name="CheatSpawnDoggos" xml:space="preserve">
+    <value>Spawn doggos...</value>
+  </data>
+  <data name="CheatMassDismantle" xml:space="preserve">
+    <value>Mass dismantle...</value>
+  </data>
+  <data name="CheatEverythingBox" xml:space="preserve">
+    <value>Create crate with all items...</value>
+  </data>
+  <data name="CheatTeleportCrates" xml:space="preserve">
+    <value>Teleport crates to host player</value>
+  </data>
+  <data name="CheatNoCost" xml:space="preserve">
+    <value>Toggle no build cost</value>
+  </data>
+  <data name="CheatNoPowerCost" xml:space="preserve">
+    <value>Toggle no power cost</value>
+  </data>
+  <data name="CheatRemoveSlugs" xml:space="preserve">
+    <value>Remove slugs</value>
+  </data>
+  <data name="CheatRestoreSlugs" xml:space="preserve">
+    <value>Restore slugs</value>
+  </data>
+  <data name="CheatDeduplicateSchematics" xml:space="preserve">
+    <value>Deduplicate schematics</value>
   </data>
 </root>
