@@ -48,6 +48,8 @@ namespace SatisfactorySaveEditor.Properties
         public static string MenuExit => ResourceManager.GetString("MenuExit", resourceCulture);
         public static string MenuCheats => ResourceManager.GetString("MenuCheats", resourceCulture);
         public static string MenuHelp => ResourceManager.GetString("MenuHelp", resourceCulture);
+        public static string Menu3DView => ResourceManager.GetString("Menu3DView", resourceCulture);
+        public static string Msg3DNoSave_Body => ResourceManager.GetString("Msg3DNoSave_Body", resourceCulture);
         public static string MenuViewGuidesFicsit => ResourceManager.GetString("MenuViewGuidesFicsit", resourceCulture);
         public static string MenuRequestHelpDiscord => ResourceManager.GetString("MenuRequestHelpDiscord", resourceCulture);
         public static string MenuViewOnGitHub => ResourceManager.GetString("MenuViewOnGitHub", resourceCulture);

@@ -1,4 +1,4 @@
-﻿namespace SatisfactorySaveParser.Save
+namespace SatisfactorySaveParser.Save
 {
     public enum SaveHeaderVersion
     {
@@ -31,6 +31,22 @@
 
         // @2021-04-15 UE4.26 Engine Upgrade. FEditorObjectVersion Changes occurred
         UE426EngineUpdate,
+
+        // @2022 UE4.27 Engine Upgrade（Update 6 系）
+        UE427EngineUpdate,
+
+        // @2023 セーブ名をヘッダーへ追加（Update 8 系で出現）
+        AddedSaveName,
+
+        // 予約（中間バージョン）
+        ReservedHeader12,
+
+        // @2024-09 Satisfactory 1.0。ワールドパーティション対応に伴い
+        // SaveIdentifier / IsPartitionedWorld / FMD5Hash(SaveDataHash) を追加
+        AddedWorldPartitionAndHash,
+
+        // @2024+ 1.1/1.2。クリエイティブモードフラグを追加
+        AddedCreativeMode,
 
         // -----<new versions can be added above this line>-----
         VersionPlusOne,

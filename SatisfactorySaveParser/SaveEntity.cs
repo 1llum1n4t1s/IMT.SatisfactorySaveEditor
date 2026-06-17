@@ -63,6 +63,33 @@ namespace SatisfactorySaveParser
             WasPlacedInLevel = reader.ReadInt32() == 1;
         }
 
+        /// <summary>
+        ///     1.0+ TOC blob からアクターヘッダー（FActorSaveHeader）を読む。
+        ///     ベースで ClassName/Reference を読み、ObjectFlags（SaveVersion>=49）→ トランスフォームの順。
+        /// </summary>
+        public SaveEntity(BinaryReader reader, Save.FSaveCustomVersion saveVersion) : base(reader)
+        {
+            if (saveVersion >= Save.FSaveCustomVersion.AddedObjectFlagsToHeader)
+                ObjectFlags = reader.ReadUInt32();
+
+            NeedTransform = reader.ReadInt32() == 1;
+            Rotation = reader.ReadVector4();
+            Position = reader.ReadVector3();
+            Scale = reader.ReadVector3();
+            WasPlacedInLevel = reader.ReadInt32() == 1;
+        }
+
+        public override void SerializeNewHeader(BinaryWriter writer, Save.FSaveCustomVersion saveVersion)
+        {
+            base.SerializeNewHeader(writer, saveVersion);
+
+            writer.Write(NeedTransform ? 1 : 0);
+            writer.Write(Rotation);
+            writer.Write(Position);
+            writer.Write(Scale);
+            writer.Write(WasPlacedInLevel ? 1 : 0);
+        }
+
         public override void SerializeHeader(BinaryWriter writer)
         {
             base.SerializeHeader(writer);

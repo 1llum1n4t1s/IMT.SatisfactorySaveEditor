@@ -49,6 +49,12 @@
   <data name="MenuHelp" xml:space="preserve">
     <value>_Help</value>
   </data>
+  <data name="Menu3DView" xml:space="preserve">
+    <value>_3D View</value>
+  </data>
+  <data name="Msg3DNoSave_Body" xml:space="preserve">
+    <value>Open a save file first to view it in 3D.</value>
+  </data>
   <data name="MenuViewGuidesFicsit" xml:space="preserve">
     <value>View guides on ficsit.app</value>
   </data>

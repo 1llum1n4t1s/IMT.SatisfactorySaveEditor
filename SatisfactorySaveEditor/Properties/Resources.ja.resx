@@ -49,6 +49,12 @@
   <data name="MenuHelp" xml:space="preserve">
     <value>ヘルプ(_H)</value>
   </data>
+  <data name="Menu3DView" xml:space="preserve">
+    <value>3Dビュー(_3)</value>
+  </data>
+  <data name="Msg3DNoSave_Body" xml:space="preserve">
+    <value>先にセーブファイルを開いてください。</value>
+  </data>
   <data name="MenuViewGuidesFicsit" xml:space="preserve">
     <value>ficsit.app でガイドを見る</value>
   </data>

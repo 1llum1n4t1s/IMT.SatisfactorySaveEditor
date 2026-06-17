@@ -1,4 +1,4 @@
-﻿using SuperLightLogger;
+using SuperLightLogger;
 using SatisfactorySaveParser.Save;
 using SatisfactorySaveParser.Structures;
 using System.IO.Compression;
@@ -39,6 +39,12 @@ namespace SatisfactorySaveParser
         public List<ObjectReference> CollectedObjects { get; set; } = new List<ObjectReference>();
 
         /// <summary>
+        ///     Satisfactory 1.0+（ワールドパーティション）のボディ。新形式セーブのときのみ非 null。
+        ///     旧 Update 5 までの平坦形式では null で、<see cref="Entries"/> を使う。
+        /// </summary>
+        public SaveBodyV2 BodyV2 { get; private set; }
+
+        /// <summary>
         ///     Open a savefile from disk
         /// </summary>
         /// <param name="file">Full path to the .sav file, usually found in %localappdata%/FactoryGame/Saved/SaveGames</param>
@@ -51,7 +57,7 @@ namespace SatisfactorySaveParser
             using (var stream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var reader = new BinaryReader(stream))
             {
-                if(stream.Length == 0)
+                if (stream.Length == 0)
                 {
                     throw new Exception("Save file is completely empty");
                 }
@@ -64,51 +70,76 @@ namespace SatisfactorySaveParser
                 }
                 else
                 {
-                    using (var buffer = new MemoryStream())
+                    using (var buffer = Decompress(stream, reader, Header.IsNewFormat))
                     {
-                        var uncompressedSize = 0L;
-
-                        while (stream.Position < stream.Length)
-                        {
-                            var header = reader.ReadChunkInfo();
-                            Trace.Assert(header.CompressedSize == ChunkInfo.Magic);
-                            Trace.Assert(header.UncompressedSize == ChunkInfo.ChunkSize);
-
-                            var summary = reader.ReadChunkInfo();
-
-                            var subChunk = reader.ReadChunkInfo();
-                            Trace.Assert(subChunk.UncompressedSize == summary.UncompressedSize);
-
-                            var startPosition = stream.Position;
-                            using (var zStream = new ZLibStream(stream, CompressionMode.Decompress, leaveOpen: true))
-                            {
-                                zStream.CopyTo(buffer);
-                            }
-
-                            // ZlibStream appears to read more bytes than it uses (because of buffering probably) so we need to manually fix the input stream position
-                            stream.Position = startPosition + subChunk.CompressedSize;
-
-                            uncompressedSize += subChunk.UncompressedSize;
-                        }
-
-
                         buffer.Position = 0;
-
-#if DEBUG
-                        File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file) + ".bin"), buffer.ToArray());
-#endif
-
 
                         using (var bufferReader = new BinaryReader(buffer))
                         {
-                            var dataLength = bufferReader.ReadInt32();
-                            Trace.Assert(uncompressedSize == dataLength + 4);
-
-                            LoadData(bufferReader);
+                            if (Header.IsNewFormat)
+                            {
+                                // 1.0+ ワールドパーティション形式。永続レベルのオブジェクトを Entries に展開する
+                                BodyV2 = SaveBodyV2.Parse(bufferReader, Header);
+                                Entries = BodyV2.PersistentObjects;
+                            }
+                            else
+                            {
+                                var dataLength = bufferReader.ReadInt32();
+                                LoadData(bufferReader);
+                            }
                         }
                     }
                 }
             }
+        }
+
+        /// <summary>
+        ///     圧縮チャンク列を展開して 1 本のメモリストリームに連結する。
+        ///     旧形式（6×int64 ヘッダー）と 1.0+ 形式（マーカー 0x22222222 + アルゴリズム byte）に対応。
+        /// </summary>
+        private static MemoryStream Decompress(FileStream stream, BinaryReader reader, bool isNewFormat)
+        {
+            var buffer = new MemoryStream();
+
+            while (stream.Position < stream.Length)
+            {
+                long compressedSize;
+
+                if (isNewFormat)
+                {
+                    var magic = reader.ReadInt32();
+                    Trace.Assert(magic == unchecked((int)ChunkInfo.Magic));
+                    reader.ReadInt32();   // marker 0x22222222
+                    reader.ReadInt64();   // maxChunkSize (131072)
+                    reader.ReadByte();    // compressor algorithm (3 = zlib)
+                    compressedSize = reader.ReadInt64();
+                    reader.ReadInt64();   // uncompressedSize
+                    reader.ReadInt64();   // compressedSize (繰り返し)
+                    reader.ReadInt64();   // uncompressedSize (繰り返し)
+                }
+                else
+                {
+                    var header = reader.ReadChunkInfo();
+                    Trace.Assert(header.CompressedSize == ChunkInfo.Magic);
+                    Trace.Assert(header.UncompressedSize == ChunkInfo.ChunkSize);
+
+                    reader.ReadChunkInfo(); // summary
+
+                    var subChunk = reader.ReadChunkInfo();
+                    compressedSize = subChunk.CompressedSize;
+                }
+
+                var startPosition = stream.Position;
+                using (var zStream = new ZLibStream(stream, CompressionMode.Decompress, leaveOpen: true))
+                {
+                    zStream.CopyTo(buffer);
+                }
+
+                // ZLibStream はバッファリングのため使用バイト数より多く読むので、入力位置を手動で補正する
+                stream.Position = startPosition + compressedSize;
+            }
+
+            return buffer;
         }
 
         private void LoadData(BinaryReader reader)
@@ -143,10 +174,6 @@ namespace SatisfactorySaveParser
             {
                 var len = reader.ReadInt32();
                 var before = reader.BaseStream.Position;
-
-#if DEBUG
-                //log.Trace($"Reading {len} bytes @ {before} for {Entries[i].TypePath}");
-#endif
 
                 Entries[i].ParseData(len, reader, Header.BuildVersion);
                 var after = reader.BaseStream.Position;
@@ -194,50 +221,79 @@ namespace SatisfactorySaveParser
                     using (var buffer = new MemoryStream())
                     using (var bufferWriter = new BinaryWriter(buffer))
                     {
-                        bufferWriter.Write(0); // Placeholder size
-
-                        SaveData(bufferWriter, Header.BuildVersion);
-
-                        buffer.Position = 0;
-                        bufferWriter.Write((int)buffer.Length - 4);
-                        buffer.Position = 0;
-
-                        for (var i = 0; i < (int)Math.Ceiling((double)buffer.Length / ChunkInfo.ChunkSize); i++)
+                        if (Header.IsNewFormat)
                         {
-                            using (var zBuffer = new MemoryStream())
-                            {
-                                var remaining = (int)Math.Min(ChunkInfo.ChunkSize, buffer.Length - (ChunkInfo.ChunkSize * i));
-
-                                using (var zStream = new ZLibStream(zBuffer, CompressionLevel.Optimal, leaveOpen: true))
-                                {
-                                    var tmpBuf = new byte[remaining];
-                                    buffer.Read(tmpBuf, 0, remaining);
-                                    zStream.Write(tmpBuf, 0, remaining);
-                                }
-
-                                writer.Write(new ChunkInfo()
-                                {
-                                    CompressedSize = ChunkInfo.Magic,
-                                    UncompressedSize = ChunkInfo.ChunkSize
-                                });
-
-                                writer.Write(new ChunkInfo()
-                                {
-                                    CompressedSize = zBuffer.Length,
-                                    UncompressedSize = remaining
-                                });
-
-                                writer.Write(new ChunkInfo()
-                                {
-                                    CompressedSize = zBuffer.Length,
-                                    UncompressedSize = remaining
-                                });
-
-                                //writer.Write(tmpBuf);
-                                //zBuffer.CopyTo(stream);
-                                writer.Write(zBuffer.ToArray());
-                            }
+                            // int64 長さ + 本体。永続オブジェクトは Entries（編集後の状態）から再構築する
+                            BodyV2.Serialize(bufferWriter, Header, Entries);
                         }
+                        else
+                        {
+                            bufferWriter.Write(0); // Placeholder size
+
+                            SaveData(bufferWriter, Header.BuildVersion);
+
+                            buffer.Position = 0;
+                            bufferWriter.Write((int)buffer.Length - 4);
+                        }
+
+                        buffer.Position = 0;
+                        Compress(writer, buffer, Header.IsNewFormat);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     展開済みボディを 128KiB ごとに zlib 圧縮してチャンク列として書き出す。
+        /// </summary>
+        private static void Compress(BinaryWriter writer, MemoryStream buffer, bool isNewFormat)
+        {
+            for (var i = 0; i < (int)Math.Ceiling((double)buffer.Length / ChunkInfo.ChunkSize); i++)
+            {
+                using (var zBuffer = new MemoryStream())
+                {
+                    var remaining = (int)Math.Min(ChunkInfo.ChunkSize, buffer.Length - (ChunkInfo.ChunkSize * i));
+
+                    using (var zStream = new ZLibStream(zBuffer, CompressionLevel.Optimal, leaveOpen: true))
+                    {
+                        var tmpBuf = new byte[remaining];
+                        buffer.Read(tmpBuf, 0, remaining);
+                        zStream.Write(tmpBuf, 0, remaining);
+                    }
+
+                    if (isNewFormat)
+                    {
+                        writer.Write(unchecked((int)ChunkInfo.Magic));  // 0x9E2A83C1
+                        writer.Write(ChunkInfo.NewFormatMarker);        // 0x22222222
+                        writer.Write((long)ChunkInfo.ChunkSize);        // maxChunkSize
+                        writer.Write(ChunkInfo.CompressorZlib);         // 3 = zlib
+                        writer.Write(zBuffer.Length);                   // compressedSize
+                        writer.Write((long)remaining);                  // uncompressedSize
+                        writer.Write(zBuffer.Length);                   // compressedSize (繰り返し)
+                        writer.Write((long)remaining);                  // uncompressedSize (繰り返し)
+                        writer.Write(zBuffer.ToArray());
+                    }
+                    else
+                    {
+                        writer.Write(new ChunkInfo()
+                        {
+                            CompressedSize = ChunkInfo.Magic,
+                            UncompressedSize = ChunkInfo.ChunkSize
+                        });
+
+                        writer.Write(new ChunkInfo()
+                        {
+                            CompressedSize = zBuffer.Length,
+                            UncompressedSize = remaining
+                        });
+
+                        writer.Write(new ChunkInfo()
+                        {
+                            CompressedSize = zBuffer.Length,
+                            UncompressedSize = remaining
+                        });
+
+                        writer.Write(zBuffer.ToArray());
                     }
                 }
             }

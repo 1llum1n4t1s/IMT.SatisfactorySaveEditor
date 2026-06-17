@@ -17,6 +17,7 @@ namespace SatisfactorySaveEditor.Model
     public class SaveObjectModel : ObservableObject
     {
         private string title;
+        private string displayName;
         private string rootObject;
         private string type;
         private bool isSelected;
@@ -69,6 +70,16 @@ namespace SatisfactorySaveEditor.Model
             set { SetProperty(ref title, value, nameof(Title)); }
         }
 
+        /// <summary>
+        ///     ツリーに表示する人間可読ラベル（表示専用）。生の Title/InstanceName/クラスパスを
+        ///     <see cref="FriendlyName"/> で整形したもの。検索・コピー・保存は引き続き <see cref="Title"/> 等の生名を使う。
+        /// </summary>
+        public string DisplayName
+        {
+            get => displayName;
+            set { SetProperty(ref displayName, value, nameof(DisplayName)); }
+        }
+
         public string RootObject
         {
             get => rootObject;
@@ -101,8 +112,13 @@ namespace SatisfactorySaveEditor.Model
             Title = model.InstanceName;
             RootObject = model.RootObject;
             Type = model.TypePath.Split('/').Last();
+            DisplayName = FriendlyName.Pretty(!string.IsNullOrEmpty(model.TypePath) ? model.TypePath : model.InstanceName);
 
-            Fields = new ObservableCollection<SerializedPropertyViewModel>(Model.DataFields.Select(PropertyViewModelMapper.Convert));
+            // 1.0+ 新形式で内部データを未パース保持しているオブジェクト（DataFields==null, RawData 保持）は
+            // プロパティ列を持たない（プロパティ編集は後段で対応）。ツリー表示・トランスフォーム編集は可能。
+            Fields = Model.DataFields != null
+                ? new ObservableCollection<SerializedPropertyViewModel>(Model.DataFields.Select(PropertyViewModelMapper.Convert))
+                : new ObservableCollection<SerializedPropertyViewModel>();
 
             CopyNameCommand = new RelayCommand(CopyName);
             CopyPathCommand = new RelayCommand(CopyPath);
@@ -114,6 +130,7 @@ namespace SatisfactorySaveEditor.Model
         {
             Title = title;
             Type = title;
+            DisplayName = FriendlyName.Pretty(title);
 
             CopyNameCommand = new RelayCommand(CopyName);
         }
@@ -185,12 +202,17 @@ namespace SatisfactorySaveEditor.Model
 
             Model.InstanceName = Title;
 
-            var newObjects = Fields.Select(vm => vm.Model).ToList();
-            Model.DataFields.RemoveAll(s => !newObjects.Contains(s));
-            newObjects.RemoveAll(s => Model.DataFields.Contains(s));
-            Model.DataFields.AddRange(newObjects);
+            // 1.0+ 新形式で内部データ未パース（DataFields==null）の場合はプロパティの反映をスキップする。
+            // RawData がそのまま書き戻されるため round-trip は保たれる。
+            if (Model.DataFields != null)
+            {
+                var newObjects = Fields.Select(vm => vm.Model).ToList();
+                Model.DataFields.RemoveAll(s => !newObjects.Contains(s));
+                newObjects.RemoveAll(s => Model.DataFields.Contains(s));
+                Model.DataFields.AddRange(newObjects);
 
-            foreach (var field in Fields) field.ApplyChanges();
+                foreach (var field in Fields) field.ApplyChanges();
+            }
         }
 
         public T FindField<T>(string fieldName, Action<T> edit = null) where T : SerializedPropertyViewModel
@@ -236,6 +258,10 @@ namespace SatisfactorySaveEditor.Model
 
         public virtual bool MatchesFilter(string filter)
         {
+            // 人間可読ラベル（例「conveyor」「constructor」）でも引けるようにする
+            if (DisplayName != null && DisplayName.ToLower(CultureInfo.InvariantCulture).Contains(filter))
+                return true;
+
             return this.Model?.InstanceName.ToLower(CultureInfo.InvariantCulture).Contains(filter) ?? false;
         }
 

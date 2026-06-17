@@ -104,6 +104,7 @@ namespace SatisfactorySaveEditor.ViewModel
         public RelayCommand ResetSearchCommand { get; }
         public RelayCommand CheckUpdatesCommand { get; }
         public RelayCommand PreferencesCommand { get; }
+        public RelayCommand Open3DViewCommand { get; }
 
         public bool HasUnsavedChanges { get; set; } //TODO: set this to true when any value in WPF is changed. current plan for this according to goz3rr is to make a wrapper for the data from the parser and then change the set method in the wrapper
 
@@ -173,6 +174,7 @@ namespace SatisfactorySaveEditor.ViewModel
                 CheckForUpdate(true).ConfigureAwait(false);
             });
             PreferencesCommand = new RelayCommand(OpenPreferences);
+            Open3DViewCommand = new RelayCommand(Open3DView);
 
             DeleteCommand = new RelayCommand<SaveObjectModel>(Delete, CanDelete);
             SaveCommand = new AsyncCommand<bool>(async (saveAs) => await Save(saveAs), CanSave, null, true);
@@ -191,6 +193,24 @@ namespace SatisfactorySaveEditor.ViewModel
             };
 
             window.ShowDialog();
+        }
+
+        /// <summary>
+        ///     3D ワールドビューを非モーダルで開く（ツリーと並行して使える）。セーブ未ロードなら何もしない。
+        /// </summary>
+        private void Open3DView()
+        {
+            if (saveGame?.Entries == null || saveGame.Entries.Count == 0)
+            {
+                MessageBox.Show(Resources.Msg3DNoSave_Body, Resources.Menu3DView, MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var window = new World3DWindow(saveGame.Entries)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            window.Show();
         }
 
         private async Task CheckForUpdate(bool manual)
@@ -508,6 +528,125 @@ namespace SatisfactorySaveEditor.ViewModel
         }
 
         /// <summary>
+        /// 3D ビュー等の外部から、インスタンス名でツリー選択を駆動する公開エントリ。
+        /// 右ペイン（SelectedItem バインド）を更新し、ツリーのハイライト＋祖先展開も行う。
+        /// </summary>
+        /// <param name="instanceName">対象 SaveObject の InstanceName（= SaveObjectModel.Title）</param>
+        /// <returns>選択できた場合 true</returns>
+        public bool SelectByInstanceName(string instanceName)
+        {
+            if (string.IsNullOrEmpty(instanceName) || rootItem == null)
+                return false;
+
+            var target = rootItem.FindChild(instanceName, true); // ヒット時 IsSelected=true・祖先 IsExpanded=true
+            if (target == null)
+                return false;
+
+            if (SelectedItem != null && !ReferenceEquals(SelectedItem, target))
+                SelectedItem.IsSelected = false;
+            SelectedItem = target; // 右ペイン（PROPERTIES）を更新
+            return true;
+        }
+
+        /// <summary>
+        /// 3D ビュー等の外部から、インスタンス名でオブジェクトを削除する。既存 Delete（:252）と同じく
+        /// ツリーから外すだけで、Save 時に rootItem.DescendantSelf との Intersect で Entries から自動 prune される。
+        /// </summary>
+        public bool DeleteByInstanceName(string instanceName)
+        {
+            if (string.IsNullOrEmpty(instanceName) || rootItem == null)
+                return false;
+
+            var m = rootItem.FindChild(instanceName, false);
+            if (m == null || m == rootItem)
+                return false;
+
+            rootItem.Remove(m);
+            if (SelectedItem == m) SelectedItem = null; // 右ペインをクリア
+            OnPropertyChanged(nameof(RootItem));
+            HasUnsavedChanges = true;
+            return true;
+        }
+
+        /// <summary>
+        /// 3D ビュー等の外部から、インスタンス名でオブジェクトを複製する。新しい一意 InstanceName を採番し、
+        /// 1.0 本体（RawData）は逐語コピーするので byte-exact round-trip。Position は +offsetXcm ずらす。
+        /// クローンを Entries とツリー両方に追加し、複製した SaveEntity を返す（3D 側で立方体追加・選択に使う）。
+        /// </summary>
+        public SaveEntity DuplicateByInstanceName(string instanceName, float offsetXcm = 300f)
+        {
+            if (string.IsNullOrEmpty(instanceName) || saveGame?.Entries == null || rootItem == null)
+                return null;
+
+            var src = saveGame.Entries.OfType<SaveEntity>().FirstOrDefault(e => e.InstanceName == instanceName);
+            if (src == null) return null;
+
+            var clone = new SaveEntity(src.TypePath, src.RootObject, MakeUniqueInstanceName(src.InstanceName))
+            {
+                ObjectFlags = src.ObjectFlags,
+                NeedTransform = src.NeedTransform,
+                WasPlacedInLevel = src.WasPlacedInLevel,
+                DataSaveVersion = src.DataSaveVersion,
+                ShouldMigrate = src.ShouldMigrate,
+                OptionalVersionData = src.OptionalVersionData, // byte[]（編集しないので参照コピー可）
+                RawData = src.RawData,                         // 1.0 本体は逐語コピー（InstanceName は RawData に無い）
+                DataFields = src.DataFields,                   // 旧形式用（1.0 では null）
+                ParentObjectRoot = src.ParentObjectRoot,
+                ParentObjectName = src.ParentObjectName,
+                Components = new System.Collections.Generic.List<SatisfactorySaveParser.Structures.ObjectReference>(src.Components),
+            };
+
+            // Vector はクラス＝共有回避のため必ず new する（共有すると原本も動く）。
+            var r = src.Rotation;
+            clone.Rotation = new SatisfactorySaveParser.Structures.Vector4 { X = r.X, Y = r.Y, Z = r.Z, W = r.W };
+            var s = src.Scale;
+            clone.Scale = new SatisfactorySaveParser.Structures.Vector3 { X = s.X, Y = s.Y, Z = s.Z };
+            var p = src.Position;
+            clone.Position = new SatisfactorySaveParser.Structures.Vector3 { X = p.X + offsetXcm, Y = p.Y, Z = p.Z };
+
+            // パーサ Entries に追加（保存の真実）。
+            saveGame.Entries.Add(clone);
+
+            // エディタツリーにも追加（DescendantSelf に乗せ、Save 時の Except 分岐で Entries 整合）。原本と同じ親の下へ。
+            var srcNode = rootItem.FindChild(src.InstanceName, false);
+            var parent = (srcNode != null ? FindParentOf(rootItem, srcNode) : null) ?? rootItem;
+            parent.Items.Add(new SaveEntityModel(clone));
+
+            OnPropertyChanged(nameof(RootItem));
+            HasUnsavedChanges = true;
+            return clone;
+        }
+
+        /// <summary>ツリーを再帰探索し、target を直接の子に持つ親ノードを返す（SaveObjectModel に Parent が無いため）。</summary>
+        private static SaveObjectModel FindParentOf(SaveObjectModel root, SaveObjectModel target)
+        {
+            if (root == null) return null;
+            foreach (var child in root.Items)
+            {
+                if (ReferenceEquals(child, target)) return root;
+                var found = FindParentOf(child, target);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>末尾の数値 id を置換し、既存 InstanceName と衝突しない一意名を返す（衝突は in-game の参照解決を壊す）。</summary>
+        private string MakeUniqueInstanceName(string original)
+        {
+            var existing = new System.Collections.Generic.HashSet<string>(saveGame.Entries.Select(e => e.InstanceName));
+            string prefix; long start;
+            int us = original.LastIndexOf('_');
+            if (us >= 0 && long.TryParse(original.Substring(us + 1), out start))
+                prefix = original.Substring(0, us + 1);
+            else { prefix = original + "_"; start = 0; }
+            for (long i = start + 1; ; i++)
+            {
+                var candidate = prefix + i.ToString(CultureInfo.InvariantCulture);
+                if (!existing.Contains(candidate)) return candidate;
+            }
+        }
+
+        /// <summary>
         /// Opens a StringPromptWindow prompting for an EntityName to jump to
         /// </summary>
         private void JumpMenu()
@@ -606,6 +745,12 @@ namespace SatisfactorySaveEditor.ViewModel
             }
 
             BuildNode(rootItem.Items, saveTree);
+
+            // [diag] ツリー構築結果の確認用（原因特定後に除去）。
+            log.Debug($"[diag] Tree built: entries={saveGame.Entries.Count}, " +
+                      $"entities={saveGame.Entries.OfType<SaveEntity>().Count()}, " +
+                      $"components={saveGame.Entries.OfType<SaveComponent>().Count()}, " +
+                      $"topLevelNodes={rootItem.Items.Count}");
 
             rootItem.IsExpanded = true;
             foreach (var item in rootItem.Items)
