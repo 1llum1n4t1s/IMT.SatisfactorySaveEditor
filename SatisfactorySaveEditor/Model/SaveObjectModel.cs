@@ -111,7 +111,7 @@ namespace SatisfactorySaveEditor.Model
             Model = model;
             Title = model.InstanceName;
             RootObject = model.RootObject;
-            Type = model.TypePath.Split('/').Last();
+            Type = !string.IsNullOrEmpty(model.TypePath) ? model.TypePath.Split('/').Last() : string.Empty;
             DisplayName = FriendlyName.Pretty(!string.IsNullOrEmpty(model.TypePath) ? model.TypePath : model.InstanceName);
 
             // 1.0+ 新形式で内部データを未パース保持しているオブジェクト（DataFields==null, RawData 保持）は
@@ -258,11 +258,12 @@ namespace SatisfactorySaveEditor.Model
 
         public virtual bool MatchesFilter(string filter)
         {
-            // 人間可読ラベル（例「conveyor」「constructor」）でも引けるようにする
-            if (DisplayName != null && DisplayName.ToLower(CultureInfo.InvariantCulture).Contains(filter))
+            // 人間可読ラベル（例「conveyor」「constructor」）でも引けるようにする。
+            // .NET 10 の StringComparison.OrdinalIgnoreCase でアロケーションフリーに大小無視比較する。
+            if (DisplayName != null && DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            return this.Model?.InstanceName.ToLower(CultureInfo.InvariantCulture).Contains(filter) ?? false;
+            return this.Model?.InstanceName?.Contains(filter, StringComparison.OrdinalIgnoreCase) ?? false;
         }
 
         private void AddProperty()

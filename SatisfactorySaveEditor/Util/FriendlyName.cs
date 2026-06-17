@@ -11,19 +11,19 @@ namespace SatisfactorySaveEditor.Util
     ///       "/Script/FactoryGame.FGWorldSettings"                    -> "World Settings"
     ///     セーブデータは一切変更しない。元の生名はツールチップ／コピーで参照できる。
     /// </summary>
-    public static class FriendlyName
+    public static partial class FriendlyName
     {
         // クラス名の接頭辞（Satisfactory のアセット命名規則）。前方一致で 1 つだけ除去する。
         private static readonly string[] Prefixes =
             { "Build_", "Desc_", "Recipe_", "BP_", "Char_", "Foundation_", "Wall_", "SubclassOf_", "EResource_" };
 
-        // 末尾の UAID / 連番（インスタンス識別子）。表示名からは省く。
-        private static readonly Regex TrailingId =
-            new Regex(@"(_UAID_[0-9A-Fa-f]+(_[0-9]+)?|_[0-9]+)$", RegexOptions.Compiled);
+        // 末尾の UAID / 連番（インスタンス識別子）。表示名からは省く。GeneratedRegex でコンパイル時生成。
+        [GeneratedRegex(@"(_UAID_[0-9A-Fa-f]+(_[0-9]+)?|_[0-9]+)$")]
+        private static partial Regex TrailingId();
 
         // camelCase / 数字境界を空白で区切る（ConstructorMk1 -> "Constructor Mk1"）。
-        private static readonly Regex CamelSplit =
-            new Regex(@"(?<=[a-z0-9])(?=[A-Z])", RegexOptions.Compiled);
+        [GeneratedRegex(@"(?<=[a-z0-9])(?=[A-Z])")]
+        private static partial Regex CamelSplit();
 
         // 現在の表示カルチャが日本語かどうか。日本語辞書（FriendlyNameMap）を引くかの分岐に使う。
         private static bool IsJapanese =>
@@ -44,7 +44,7 @@ namespace SatisfactorySaveEditor.Util
             var dot = s.LastIndexOf('.');
             if (dot >= 0) s = s.Substring(dot + 1);        // 最後の '.' 以降（Build_X.Build_X_C -> Build_X_C）
 
-            s = TrailingId.Replace(s, "");                 // 末尾の UAID / 連番を除去（_C より先に）
+            s = TrailingId().Replace(s, "");               // 末尾の UAID / 連番を除去（_C より先に）
 
             // ja カルチャのときはクラスセグメント（"Build_X_C" / "FGComponent" 等）を日本語辞書で引く。
             // 未収録なら以降の英語ヒューリスティックへフォールバックする。
@@ -68,7 +68,7 @@ namespace SatisfactorySaveEditor.Util
                 s = s.Substring(2);
 
             s = s.Replace('_', ' ');
-            s = CamelSplit.Replace(s, " ");
+            s = CamelSplit().Replace(s, " ");
 
             s = s.Trim();
             return s.Length == 0 ? raw : s;

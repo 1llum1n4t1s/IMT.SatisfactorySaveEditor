@@ -197,13 +197,13 @@ namespace SatisfactorySaveEditor.View
         // 構造物（カテゴリ9）のローカル実寸[m]をクラス名から解決する。X=幅 Y=奥行 Z=厚み/高さ（ゲーム軸）。
         // クラス名の NxM 数字はプレフィックスで意味が変わる: Foundation=8x8xM板 / Wall=Nx0.3xM薄板 / Ramp=Nx8xM。
         // 非構造・未マッチは 1×1×1 を返し、従来どおり単位キューブで描く。Scale は呼び出し側で乗算する。
-        private static readonly System.Text.RegularExpressions.Regex NxM =
-            new System.Text.RegularExpressions.Regex(@"(\d+)x(\d+)", System.Text.RegularExpressions.RegexOptions.Compiled);
+        [System.Text.RegularExpressions.GeneratedRegex(@"(\d+)x(\d+)")]
+        private static partial System.Text.RegularExpressions.Regex NxM();
 
         private static Num.Vector3 SizeOfGame(string seg)
         {
             bool C(string s) => seg.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0;
-            var m = NxM.Match(seg);
+            var m = NxM().Match(seg);
             float n = m.Success ? int.Parse(m.Groups[1].Value) : 0f; // 第1数字（幅）
             float k = m.Success ? int.Parse(m.Groups[2].Value) : 0f; // 第2数字（高さ/厚み）
 
@@ -232,7 +232,7 @@ namespace SatisfactorySaveEditor.View
             {
                 if (!(obj is SaveEntity ent)) continue;
                 var p = ent.Position;
-                if (float.IsNaN(p.X) || float.IsNaN(p.Y) || float.IsNaN(p.Z)) continue;
+                if (p == null || float.IsNaN(p.X) || float.IsNaN(p.Y) || float.IsNaN(p.Z)) continue;
                 if (Math.Abs(p.X) < 1f && Math.Abs(p.Y) < 1f) continue;
                 // 水平 ±200km / 高さ ±5km を超える異常配置（飛行中の乗り物・projectile 等）はカメラ枠を壊すので除外。
                 if (Math.Abs(p.X) > 2e7f || Math.Abs(p.Y) > 2e7f || Math.Abs(p.Z) > 5e5f) { excluded++; continue; }

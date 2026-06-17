@@ -88,8 +88,8 @@ namespace SatisfactorySaveParser.Tests
             {
                 if (!(obj is SaveEntity ent)) continue;
                 var p = ent.Position;
-                // 設置済み（原点近傍の subsystem を除外）。NaN/極端値も弾く。
-                if (float.IsNaN(p.X) || float.IsNaN(p.Y)) continue;
+                // 設置済み（原点近傍の subsystem を除外）。null/NaN/極端値も弾く。
+                if (p == null || float.IsNaN(p.X) || float.IsNaN(p.Y)) continue;
                 if (Math.Abs(p.X) < 1f && Math.Abs(p.Y) < 1f) continue;
                 if (Math.Abs(p.X) > 1e7f || Math.Abs(p.Y) > 1e7f) continue;
 

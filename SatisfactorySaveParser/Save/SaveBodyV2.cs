@@ -296,6 +296,9 @@ namespace SatisfactorySaveParser.Save
         private static byte[] ReadBlob64(BinaryReader reader)
         {
             var size = reader.ReadInt64();
+            // 破損ファイルでの過大/負値による OOM・例外を防ぐ。残りストリーム長で検証（正当な大ブロブは弾かない）。
+            if (size < 0 || reader.BaseStream.Position + size > reader.BaseStream.Length)
+                throw new InvalidDataException($"ブロブ長 {size} がストリーム範囲外です");
             return reader.ReadBytes((int)size);
         }
 
@@ -308,6 +311,11 @@ namespace SatisfactorySaveParser.Save
         private static List<ObjectReference> ReadReferences(BinaryReader reader)
         {
             var count = reader.ReadInt32();
+            // 各 ObjectReference は最低 8 byte（長さ0の FString 2 本）。残りストリーム長で上限検証し、
+            // 破損ファイルでの過大 capacity による OOM を防ぐ。固定上限ではなくファイル長基準なので正当な大規模レベルは弾かない。
+            var remaining = reader.BaseStream.Length - reader.BaseStream.Position;
+            if (count < 0 || (long)count * 8 > remaining)
+                throw new InvalidDataException($"参照数 {count} が不正です（ストリーム残り {remaining} byte）");
             var list = new List<ObjectReference>(count);
             for (var i = 0; i < count; i++)
                 list.Add(new ObjectReference(reader));
@@ -347,7 +355,10 @@ namespace SatisfactorySaveParser.Save
             reader.ReadUInt32();                // changelist
             reader.ReadLengthPrefixedString();  // branch
             var cvCount = reader.ReadInt32();
-            reader.BaseStream.Position += cvCount * 20; // (GUID 16 + int32) * count
+            // (GUID 16 + int32) * count。破損ファイルでの不正シーク（負値/終端超過）を防ぐ。long 算術で桁あふれも回避。
+            if (cvCount < 0 || reader.BaseStream.Position + (long)cvCount * 20 > reader.BaseStream.Length)
+                throw new InvalidDataException($"カスタムバージョン数 {cvCount} が不正です");
+            reader.BaseStream.Position += (long)cvCount * 20;
         }
 
         private static void SkipValidationGrids(BinaryReader reader)

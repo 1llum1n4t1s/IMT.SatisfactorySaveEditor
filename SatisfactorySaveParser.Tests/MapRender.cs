@@ -93,7 +93,7 @@ namespace SatisfactorySaveParser.Tests
             {
                 if (!(obj is SaveEntity ent)) continue;
                 var p = ent.Position;
-                if (float.IsNaN(p.X) || float.IsNaN(p.Y)) continue;
+                if (p == null || float.IsNaN(p.X) || float.IsNaN(p.Y)) continue;
                 if (Math.Abs(p.X) < 1f && Math.Abs(p.Y) < 1f) continue;
                 if (Math.Abs(p.X) > 1e7f || Math.Abs(p.Y) > 1e7f) continue;
                 var seg = obj.TypePath ?? "";
