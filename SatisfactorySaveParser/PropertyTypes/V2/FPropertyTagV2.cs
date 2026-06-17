@@ -60,7 +60,14 @@ namespace SatisfactorySaveParser.PropertyTypes.V2
             writer.Write(BinarySize);
             writer.Write(Flags);
             if (HasIndex) writer.Write(Index);
-            if (HasGuid) writer.Write(PropertyGuid);
+            if (HasGuid)
+            {
+                // Read 側と対称に 16byte を保証する（V2 タグのシリアライズ有効化時に不正な再出力を防ぐ）。
+                // Read で 16byte を検証済みのため、正当タグの再シリアライズではこの分岐は発火せず byte-exact のまま。
+                if (PropertyGuid == null || PropertyGuid.Length != 16)
+                    throw new InvalidDataException($"PropertyTag '{Name}': HasGuid だが PropertyGuid が 16byte ではありません");
+                writer.Write(PropertyGuid);
+            }
         }
 
         public override string ToString()
