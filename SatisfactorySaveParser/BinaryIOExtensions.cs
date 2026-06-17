@@ -19,7 +19,10 @@ namespace SatisfactorySaveParser
             {
                 if (count > remaining)
                     throw new InvalidDataException($"String length {count} exceeds remaining stream {remaining}");
-                return reader.ReadChars(count);
+                // 正の length は「バイト数」（ASCII/UTF-8・null 終端込み）。ReadChars は文字数として解釈するため
+                // 非 ASCII で読み過ぎてストリームがずれる。正確に count バイト読んで UTF-8 デコードする
+                // （ASCII では従来の ReadChars と byte-exact 等価、round-trip 不変）。
+                return Encoding.UTF8.GetString(reader.ReadBytes(count)).ToCharArray();
             }
             else
             {

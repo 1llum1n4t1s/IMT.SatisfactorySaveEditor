@@ -24,9 +24,11 @@ namespace SatisfactorySaveEditor.Model
             set { SetProperty(ref parentEntityName, value, nameof(ParentEntityName)); }
         }
 
-        public RelayCommand FillInventoryCommand => new RelayCommand(FillInventory);
+        // 1.0+ raw V2 コンポーネント（DataFields==null）は mInventoryStacks を持たず Inventory==null。
+        // その場合コマンドを無効化し、Fill/Empty 実行時の inv.Elements 参照クラッシュを防ぐ。
+        public RelayCommand FillInventoryCommand => new RelayCommand(FillInventory, () => Inventory != null);
 
-        public RelayCommand EmptyInventoryCommand => new RelayCommand(EmptyInventory);
+        public RelayCommand EmptyInventoryCommand => new RelayCommand(EmptyInventory, () => Inventory != null);
 
         public SaveComponentModel(SaveComponent sc) : base(sc)
         {
@@ -66,6 +68,7 @@ namespace SatisfactorySaveEditor.Model
 
         private void FillInventory()
         {
+            if (Inventory == null) return; // raw V2 コンポーネント等で在庫プロパティが無い場合は何もしない（クラッシュ防止）
             FillWindow dialog = new FillWindow();
             FillViewModel fvm = (FillViewModel) dialog.DataContext;
             dialog.ShowDialog();
@@ -86,6 +89,7 @@ namespace SatisfactorySaveEditor.Model
         private void EmptyInventory()
         {
             var inv = this.Inventory;
+            if (inv == null) return; // raw V2 コンポーネント等で在庫プロパティが無い場合は何もしない（クラッシュ防止）
             foreach (StructPropertyViewModel element in inv.Elements)
             {
                 DynamicStructDataViewModel structData = (DynamicStructDataViewModel)element.StructData;

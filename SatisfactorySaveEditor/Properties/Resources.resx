@@ -58,6 +58,12 @@
   <data name="World3DControlsHelp" xml:space="preserve">
     <value>WASD=Move / Q·Z=Up·Down / Right-drag=Rotate / Wheel=Zoom / Left-click=Select / Delete=Delete / Ctrl+D=Duplicate</value>
   </data>
+  <data name="MsgCheatUnsupportedV2_Title" xml:space="preserve">
+    <value>Not supported on 1.0+ saves</value>
+  </data>
+  <data name="MsgCheatUnsupportedV2_Body" xml:space="preserve">
+    <value>This cheat changes the collected-object list, which is not yet written back for 1.0+ (partitioned) saves — the change would be silently lost on save. It is disabled for this save format.</value>
+  </data>
   <data name="Msg3DNoSave_Body" xml:space="preserve">
     <value>Open a save file first to view it in 3D.</value>
   </data>

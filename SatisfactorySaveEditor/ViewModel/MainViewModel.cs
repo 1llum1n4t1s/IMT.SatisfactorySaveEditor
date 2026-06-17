@@ -273,6 +273,19 @@ namespace SatisfactorySaveEditor.ViewModel
         {
             
             log.Info($"Applying cheat {cheat.Name}");
+
+            // 1.0+ セーブでは CollectedObjects が V2 ボディに書き出されないため、スラグ系チートは
+            // 適用しても保存時に黙って失われる。「成功したのに反映されない」誤操作を避けるためブロックする。
+            if (saveGame?.Header != null && saveGame.Header.IsNewFormat
+                && (cheat is RemoveSlugsCheat || cheat is RestoreSlugsCheat))
+            {
+                System.Windows.MessageBox.Show(
+                    SatisfactorySaveEditor.Properties.Resources.MsgCheatUnsupportedV2_Body,
+                    SatisfactorySaveEditor.Properties.Resources.MsgCheatUnsupportedV2_Title,
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
             if (cheat.Apply(rootItem, saveGame))
                 HasUnsavedChanges = true;
         }

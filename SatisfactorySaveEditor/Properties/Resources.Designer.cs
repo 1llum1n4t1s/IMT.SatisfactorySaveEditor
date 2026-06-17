@@ -49,6 +49,8 @@ namespace SatisfactorySaveEditor.Properties
         public static string MenuCheats => ResourceManager.GetString("MenuCheats", resourceCulture);
         public static string MenuHelp => ResourceManager.GetString("MenuHelp", resourceCulture);
         public static string Menu3DView => ResourceManager.GetString("Menu3DView", resourceCulture);
+        public static string MsgCheatUnsupportedV2_Title => ResourceManager.GetString("MsgCheatUnsupportedV2_Title", resourceCulture);
+        public static string MsgCheatUnsupportedV2_Body => ResourceManager.GetString("MsgCheatUnsupportedV2_Body", resourceCulture);
         public static string Msg3DNoSave_Body => ResourceManager.GetString("Msg3DNoSave_Body", resourceCulture);
         public static string MenuViewGuidesFicsit => ResourceManager.GetString("MenuViewGuidesFicsit", resourceCulture);
         public static string MenuRequestHelpDiscord => ResourceManager.GetString("MenuRequestHelpDiscord", resourceCulture);

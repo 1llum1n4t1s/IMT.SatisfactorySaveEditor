@@ -203,12 +203,18 @@ namespace SatisfactorySaveParser.Save
             using (var dataReader = new BinaryReader(dataStream))
             {
                 var count = dataReader.ReadInt32();
+                if (count != objects.Count)
+                    throw new InvalidDataException($"DATA オブジェクト数 {count} が TOC オブジェクト数 {objects.Count} と一致しません");
                 for (var i = 0; i < count; i++)
                 {
                     var obj = objects[i];
                     obj.DataSaveVersion = dataReader.ReadInt32();
                     obj.ShouldMigrate = dataReader.ReadInt32() != 0;
                     var len = dataReader.ReadInt32();
+                    // 破損ファイルでの負値/過大長による例外・サイレント短読み（フレーム desync）を防ぐ。
+                    // 正当な save では len は厳密に一致するのでこの分岐は発火しない。
+                    if (len < 0 || dataStream.Position + len > dataStream.Length)
+                        throw new InvalidDataException($"オブジェクトデータ長 {len} がストリーム範囲外です");
                     obj.RawData = dataReader.ReadBytes(len);
 
                     // ハイブリッド読み取り: 内部データをプロパティ列として解釈してみる。失敗したらそのオブジェクトは
@@ -271,7 +277,16 @@ namespace SatisfactorySaveParser.Save
                     writer.Write(obj.DataSaveVersion);
                     writer.Write(obj.ShouldMigrate ? 1 : 0);
 
-                    var raw = obj.RawData ?? new byte[0];
+                    // 1.0 オブジェクトは内部データを RawData に逐語保持して round-trip させる設計。
+                    // ディスクから読んだオブジェクトは ReadBytes により必ず非 null（長さ0でも byte[0]）なので
+                    // この throw は正当なセーブの再書き込みでは決して発火しない。RawData が null になるのは
+                    // チート/複製などプログラムから DataFields だけ詰めて生成された未対応オブジェクトのみで、
+                    // それを ?? new byte[0] で空フレームとして黙って書くと壊れたオブジェクトを生む。
+                    if (obj.RawData == null)
+                        throw new System.NotSupportedException(
+                            $"1.0+ オブジェクト '{obj.InstanceName}' は RawData を持ちません。" +
+                            "新規 1.0 オブジェクトの追加（DataFields からのプロパティ書き出し）は未対応です。");
+                    var raw = obj.RawData;
                     writer.Write(raw.Length);
                     writer.Write(raw);
 

@@ -58,6 +58,12 @@
   <data name="World3DControlsHelp" xml:space="preserve">
     <value>WASD=移動 / Q・Z=上下 / 右ドラッグ=回転 / ホイール=ズーム / 左クリック=選択 / Delete=削除 / Ctrl+D=複製</value>
   </data>
+  <data name="MsgCheatUnsupportedV2_Title" xml:space="preserve">
+    <value>1.0以降のセーブでは未対応</value>
+  </data>
+  <data name="MsgCheatUnsupportedV2_Body" xml:space="preserve">
+    <value>このチートは収集オブジェクト一覧を変更しますが、1.0以降（パーティション）セーブではまだ書き戻しに対応しておらず、保存時に黙って失われます。このセーブ形式では無効です。</value>
+  </data>
   <data name="Msg3DNoSave_Body" xml:space="preserve">
     <value>先にセーブファイルを開いてください。</value>
   </data>
