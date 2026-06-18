@@ -658,11 +658,14 @@ namespace SatisfactorySaveEditor.View
             var ent = cubeEntities[selectedCubeIndex];
             if (ent == null) return;
 
-            DeleteCube(selectedCubeIndex);  // 1) 3D 表示を縮退（序数は不変＝他キューブのピック不変）
-            ClearHighlight();               // 2) ハイライト解除
-            ClearDetails();                 //    詳細パネルも閉じる
+            // 削除が成功した時だけ 3D 表示を縮退する。参照／コンポーネント保持の 1.0 アクター等で
+            // DeleteByEntity が false を返した場合、保存側は不変なのでメッシュ・選択も一切触らない
+            // （削除拒否されたオブジェクトが 3D から消えたまま保存され続ける不整合を防ぐ）。
+            if (mvm?.DeleteByEntity(ent) != true) return; // 1) identity ベース削除（リネーム後も確実・Save で Entries 反映）
 
-            mvm?.DeleteByEntity(ent); // 3) identity ベースで削除（リネーム後も確実。Save 時に Entries へ反映）
+            DeleteCube(selectedCubeIndex);  // 2) 3D 表示を縮退（序数は不変＝他キューブのピック不変）
+            ClearHighlight();               // 3) ハイライト解除
+            ClearDetails();                 //    詳細パネルも閉じる
 
             selectedCubeIndex = -1;
         }
