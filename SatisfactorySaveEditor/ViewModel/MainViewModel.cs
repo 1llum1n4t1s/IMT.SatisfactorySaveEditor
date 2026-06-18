@@ -32,6 +32,7 @@ namespace SatisfactorySaveEditor.ViewModel
         private SaveObjectModel rootItem;
         private SaveObjectModel selectedItem;
         private string searchText;
+        private World3DWindow open3DWindow; // 開いている 3D ビュー（多重生成防止用。閉じたら null に戻す）
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         private ObservableCollection<SaveObjectModel> rootItems = new ObservableCollection<SaveObjectModel>();
         private static readonly ILog log = LogManager.GetCurrentClassLogger();
@@ -79,7 +80,10 @@ namespace SatisfactorySaveEditor.ViewModel
 
                 tokenSource.Cancel();
                 tokenSource = new CancellationTokenSource();
-                Task.Factory.StartNew(() => Filter(value), tokenSource.Token);
+                // 各検索タスクは自前の token を捕捉する。共有 tokenSource.Token を Filter 内で読むと
+                // 古いタスクが新タスクの未キャンセル token を見て古い結果を反映しうるため。
+                var filterToken = tokenSource.Token;
+                Task.Factory.StartNew(() => Filter(value, filterToken), filterToken);
             }
         }
 
@@ -104,17 +108,16 @@ namespace SatisfactorySaveEditor.ViewModel
         public RelayCommand ResetSearchCommand { get; }
         public RelayCommand CheckUpdatesCommand { get; }
         public RelayCommand PreferencesCommand { get; }
+        public RelayCommand Open3DViewCommand { get; }
 
         public bool HasUnsavedChanges { get; set; } //TODO: set this to true when any value in WPF is changed. current plan for this according to goz3rr is to make a wrapper for the data from the parser and then change the set method in the wrapper
 
         public MainViewModel()
         {
             string[] args = Environment.GetCommandLineArgs();
-            if (args.Length > 1 && File.Exists(args[1]))
-            {
-                var task = LoadFile(args[1]);
-                task.Wait();
-            }
+            // 起動引数のセーブは全 command 初期化後（ctor 末尾）にロードする。ここで即 LoadFile すると
+            // LoadFileAsync が未初期化の SaveCommand 等を参照して失敗するため、パスだけ保持しておく。
+            var initialFile = args.Length > 1 && File.Exists(args[1]) ? args[1] : null;
 
             var savedFiles = Properties.Settings.Default.LastSaves?.Cast<string>().ToList();
             
@@ -173,6 +176,7 @@ namespace SatisfactorySaveEditor.ViewModel
                 CheckForUpdate(true).ConfigureAwait(false);
             });
             PreferencesCommand = new RelayCommand(OpenPreferences);
+            Open3DViewCommand = new RelayCommand(Open3DView);
 
             DeleteCommand = new RelayCommand<SaveObjectModel>(Delete, CanDelete);
             SaveCommand = new AsyncCommand<bool>(async (saveAs) => await Save(saveAs), CanSave, null, true);
@@ -181,6 +185,12 @@ namespace SatisfactorySaveEditor.ViewModel
             ResetSearchCommand = new RelayCommand(ResetSearch);
 
             CheckForUpdate(false).ConfigureAwait(false);
+
+            // 全 command 初期化後に起動引数のセーブをロードする（fire-and-forget、例外は LoadFileAsync 内で処理済み）。
+            if (initialFile != null)
+            {
+                _ = LoadFile(initialFile);
+            }
         }
 
         private void OpenPreferences()
@@ -191,6 +201,44 @@ namespace SatisfactorySaveEditor.ViewModel
             };
 
             window.ShowDialog();
+        }
+
+        /// <summary>
+        ///     3D ワールドビューを非モーダルで開く（ツリーと並行して使える）。セーブ未ロードなら何もしない。
+        /// </summary>
+        private void Open3DView()
+        {
+            // 既に 3D ビューが開いていれば多重生成せず最前面化する。
+            // 連打で DX11 デバイス + 頂点バッファが個数分リークするのを防ぐ。
+            if (open3DWindow != null)
+            {
+                open3DWindow.Activate();
+                return;
+            }
+
+            if (saveGame?.Entries == null || rootItem == null)
+            {
+                MessageBox.Show(Resources.Msg3DNoSave_Body, Resources.Menu3DView, MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // 未保存のツリー編集（削除/複製）を反映するため、Save 時まで stale な saveGame.Entries ではなく
+            // 現在のツリー状態（Save の Entries 再構成と同じ rootItem.DescendantSelf）から構築する。
+            // これにより、削除済みアクターが 3D ビューに残って Ctrl+D でツリーに復活する不整合を防ぐ。
+            var currentObjects = rootItem.DescendantSelf.ToList();
+            if (currentObjects.Count == 0)
+            {
+                MessageBox.Show(Resources.Msg3DNoSave_Body, Resources.Menu3DView, MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var window = new World3DWindow(currentObjects)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            open3DWindow = window;
+            window.Closed += (s, e) => open3DWindow = null;
+            window.Show();
         }
 
         private async Task CheckForUpdate(bool manual)
@@ -231,8 +279,84 @@ namespace SatisfactorySaveEditor.ViewModel
         /// <param name="model">The model to delete</param>
         private void Delete(SaveObjectModel model)
         {
+            if (model == null) return;
+
+            // 実体（Model）を持つノードは 3D 削除と同じ参照ガード（DeleteByEntity）を通す。
+            if (model.Model != null)
+            {
+                DeleteByEntity(model.Model);
+                return;
+            }
+
+            // カテゴリ／フォルダ（名前のみのノード）は子孫を一括除去するため、子孫に削除拒否対象
+            //（参照保持アクター or raw V2 コンポーネント）が 1 つでも含まれるなら全体を拒否する。
+            // これを通さないと個別削除では拒否されるオブジェクトをフォルダ削除経由で prune でき、孤児化する。
+            if (SubtreeHasUndeletable(model))
+            {
+                MessageBox.Show(Resources.MsgDeleteRefUnsupported_Body, Resources.MsgDeleteRefUnsupported_Title,
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Model を持たない擬似ノードかつ子孫も全て削除可能なら従来通り単純除去。
             rootItem.Remove(model);
             OnPropertyChanged(nameof(RootItem));
+        }
+
+        /// <summary>raw V2（1.0 未パース）で削除すると round-trip 参照が孤児化するオブジェクトか。
+        /// 参照を持つアクター（コンポーネント／親／プロパティ参照）と、親から参照される raw V2 コンポーネントが該当。</summary>
+        private static bool IsUndeletableRawV2(SatisfactorySaveParser.SaveObject obj)
+        {
+            if (obj == null) return false;
+            if (obj is SatisfactorySaveParser.SaveEntity ent && ent.HasOutgoingReferences()) return true;
+            if (obj is SatisfactorySaveParser.SaveComponent && obj.DataFields == null && obj.RawData != null) return true;
+            return false;
+        }
+
+        /// <summary>raw V2（1.0 未パース）アクターが、他オブジェクトの不透明 RawData から参照されているか。
+        /// 参照は ObjectProperty/InterfaceProperty の PathName に対象 InstanceName が length-prefixed FString として
+        /// 入るため、RawData バイト列から InstanceName の UTF-8 表現を検索する（保守的近似：ヒットすれば inbound あり）。
+        /// これを見ないと、参照される側を削除したとき残りの RawData が存在しない instance を指して孤児化する。</summary>
+        private bool HasIncomingRawV2Reference(SatisfactorySaveParser.SaveObject target)
+        {
+            if (!(target is SatisfactorySaveParser.SaveEntity) || target.DataFields != null || target.RawData == null)
+                return false;
+            if (saveGame?.Entries == null || string.IsNullOrEmpty(target.InstanceName))
+                return false;
+
+            var needle = System.Text.Encoding.UTF8.GetBytes(target.InstanceName);
+            if (needle.Length == 0) return false;
+            foreach (var obj in saveGame.Entries)
+            {
+                if (ReferenceEquals(obj, target)) continue;
+                if (ContainsSequence(obj.RawData, needle)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>haystack バイト列に needle が連続部分列として含まれるか（素朴な線形探索）。</summary>
+        private static bool ContainsSequence(byte[] haystack, byte[] needle)
+        {
+            if (haystack == null || needle == null || needle.Length == 0 || haystack.Length < needle.Length)
+                return false;
+            int last = haystack.Length - needle.Length;
+            for (int i = 0; i <= last; i++)
+            {
+                int j = 0;
+                while (j < needle.Length && haystack[i + j] == needle[j]) j++;
+                if (j == needle.Length) return true;
+            }
+            return false;
+        }
+
+        /// <summary>ノードとその全子孫に、raw V2 で削除拒否すべきオブジェクトが 1 つでも含まれるか（フォルダ削除ガード用）。</summary>
+        private bool SubtreeHasUndeletable(SaveObjectModel node)
+        {
+            if (node == null) return false;
+            if (IsUndeletableRawV2(node.Model)) return true;
+            foreach (var child in node.Items)
+                if (SubtreeHasUndeletable(child)) return true;
+            return false;
         }
 
         /// <summary>
@@ -252,7 +376,20 @@ namespace SatisfactorySaveEditor.ViewModel
         private void Cheat(ICheat cheat)
         {
             
-            log.Info($"Applying cheat {cheat.Name}");
+            log.Info($"Applying cheat {cheat.GetType().Name}");
+
+            // 1.0+ セーブでは全オブジェクトが RawData 保持（DataFields==null）でプロパティ未パースのため、
+            // スラグ系（CollectedObjects 未書き出し）もプロパティ系（FindField が null を返し NRE）も機能しない。
+            // V2 プロパティ対応（Stage3）まで 1.0 では全チートをブロックする。
+            if (saveGame?.Header != null && saveGame.Header.IsNewFormat)
+            {
+                System.Windows.MessageBox.Show(
+                    SatisfactorySaveEditor.Properties.Resources.MsgCheatUnsupportedV2_Body,
+                    SatisfactorySaveEditor.Properties.Resources.MsgCheatUnsupportedV2_Title,
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
             if (cheat.Apply(rootItem, saveGame))
                 HasUnsavedChanges = true;
         }
@@ -278,6 +415,7 @@ namespace SatisfactorySaveEditor.ViewModel
         /// <param name="saveAs">(optional) If the Save As... option box should be brought up to choose a destination</param>
         private async Task Save(bool saveAs)
         {
+            string targetFile = null;
             if (saveAs)
             {
                 SaveFileDialog dialog = new SaveFileDialog
@@ -289,24 +427,11 @@ namespace SatisfactorySaveEditor.ViewModel
                     AddExtension = true
                 };
 
-                if (dialog.ShowDialog() == true)
-                {
-                    await AutoBackupIfEnabled();
-
-                    var newObjects = rootItem.DescendantSelf;
-                    saveGame.Entries = saveGame.Entries.Intersect(newObjects).ToList();
-                    saveGame.Entries.AddRange(newObjects.Except(saveGame.Entries));
-
-                    rootItem.ApplyChanges();
-                    this.IsBusy = true;
-                    await Task.Run(() => saveGame.Save(dialog.FileName));
-                    this.IsBusy = false;
-                    HasUnsavedChanges = false;
-                    OnPropertyChanged(nameof(FileName));
-                    AddRecentFileEntry(dialog.FileName);
-                }
+                if (dialog.ShowDialog() != true) return;
+                targetFile = dialog.FileName;
             }
-            else
+
+            try
             {
                 await AutoBackupIfEnabled();
 
@@ -316,9 +441,29 @@ namespace SatisfactorySaveEditor.ViewModel
 
                 rootItem.ApplyChanges();
                 this.IsBusy = true;
-                await Task.Run(() => saveGame.Save());
-                this.IsBusy = false;
+                if (targetFile != null)
+                    await Task.Run(() => saveGame.Save(targetFile));
+                else
+                    await Task.Run(() => saveGame.Save());
+
                 HasUnsavedChanges = false;
+                if (targetFile != null)
+                {
+                    OnPropertyChanged(nameof(FileName));
+                    AddRecentFileEntry(targetFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                // 保存失敗を握りつぶすとユーザーは編集が永続化されたと誤認する。明示的に通知する。
+                // SatisfactorySave.Save は memory-first（完全シリアライズ後に書き出し）なので、
+                // ここで例外が出ても元ファイルは無傷のまま残る。
+                log.Error(ex);
+                MessageBox.Show(string.Format(Resources.MsgSaveFailed_Body, ex.Message), Resources.MsgSaveFailed_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                this.IsBusy = false;
             }
         }
 
@@ -365,9 +510,17 @@ namespace SatisfactorySaveEditor.ViewModel
             }
             finally
             {
-                //delete the temporary folder and copy even if the zipping process fails
-                File.Delete(tempFilePath);
-                Directory.Delete(pathToZipFrom);
+                // 圧縮が失敗してもテンポラリを片付ける。ただし片付けの二次例外が catch で throw した真の例外を
+                // 覆い隠さないよう、削除自体を保護する。非再帰 Delete は中身が残ると例外になるため recursive で一括削除。
+                try
+                {
+                    if (Directory.Exists(pathToZipFrom))
+                        Directory.Delete(pathToZipFrom, true);
+                }
+                catch (Exception cleanupEx)
+                {
+                    log.Error(cleanupEx); // クリーンアップ失敗は副次的。本来の例外を優先するためログのみに留める
+                }
             }
 
             if (manual)
@@ -505,6 +658,181 @@ namespace SatisfactorySaveEditor.ViewModel
             if(SelectedItem != null)
                 SelectedItem.IsSelected = false;
             SelectedItem = rootItem.FindChild(target, true);
+        }
+
+        /// <summary>
+        /// 3D ビュー等の外部から、インスタンス名でツリー選択を駆動する公開エントリ。
+        /// 右ペイン（SelectedItem バインド）を更新し、ツリーのハイライト＋祖先展開も行う。
+        /// </summary>
+        /// <param name="instanceName">対象 SaveObject の InstanceName（= SaveObjectModel.Title）</param>
+        /// <returns>選択できた場合 true</returns>
+        public bool SelectByInstanceName(string instanceName)
+        {
+            if (string.IsNullOrEmpty(instanceName) || rootItem == null)
+                return false;
+
+            var target = rootItem.FindChild(instanceName, true); // ヒット時 IsSelected=true・祖先 IsExpanded=true
+            if (target == null)
+                return false;
+
+            if (SelectedItem != null && !ReferenceEquals(SelectedItem, target))
+                SelectedItem.IsSelected = false;
+            SelectedItem = target; // 右ペイン（PROPERTIES）を更新
+            return true;
+        }
+
+        /// <summary>
+        /// 3D ビュー等の外部から、インスタンス名でオブジェクトを削除する。既存 Delete（:252）と同じく
+        /// ツリーから外すだけで、Save 時に rootItem.DescendantSelf との Intersect で Entries から自動 prune される。
+        /// </summary>
+        public bool DeleteByInstanceName(string instanceName)
+        {
+            if (string.IsNullOrEmpty(instanceName) || rootItem == null)
+                return false;
+
+            var m = rootItem.FindChild(instanceName, false);
+            if (m == null || m == rootItem)
+                return false;
+
+            rootItem.Remove(m);
+            if (SelectedItem == m) SelectedItem = null; // 右ペインをクリア
+            OnPropertyChanged(nameof(RootItem));
+            HasUnsavedChanges = true;
+            return true;
+        }
+
+        /// <summary>SaveObject 実体（identity）から対応する Model ノードを再帰探索する。Title（リネームで変わる）でなく
+        /// 参照一致で引くため、プロパティペインでのリネーム後に InstanceName が旧のままでも正しく一致する。</summary>
+        private static SaveObjectModel FindNodeByModel(SaveObjectModel root, SatisfactorySaveParser.SaveObject target)
+        {
+            if (root == null) return null;
+            if (ReferenceEquals(root.Model, target)) return root;
+            foreach (var child in root.Items)
+            {
+                var found = FindNodeByModel(child, target);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>SaveObject 実体（identity）で削除する。3D ビューは SaveEntity 参照を保持するため、リネーム未適用
+        /// （Title 変更済み・InstanceName 旧のまま）でも確実にツリーから prune できる。</summary>
+        public bool DeleteByEntity(SatisfactorySaveParser.SaveObject target)
+        {
+            if (target == null || rootItem == null) return false;
+            // コンポーネント／親／参照を持つアクターを 3D 削除すると、TypePath で別グループに並ぶコンポーネントが
+            // 存在しないアクターを指す OuterPathName で書き戻され孤児化する。完全な参照 prune は Stage3 まで未対応
+            // なので、参照を持つアクターの削除は拒否する（複製ガードと対称）。
+            // raw V2（1.0 未パース）で削除すると round-trip 参照が孤児化するオブジェクトは拒否（複製ガードと対称）。
+            if (IsUndeletableRawV2(target) || HasIncomingRawV2Reference(target))
+            {
+                MessageBox.Show(Resources.MsgDeleteRefUnsupported_Body, Resources.MsgDeleteRefUnsupported_Title,
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            var m = FindNodeByModel(rootItem, target);
+            if (m == null || m == rootItem) return false;
+            rootItem.Remove(m);
+            if (SelectedItem == m) SelectedItem = null;
+            OnPropertyChanged(nameof(RootItem));
+            HasUnsavedChanges = true;
+            return true;
+        }
+
+        /// <summary>
+        /// 3D ビュー等の外部から、インスタンス名でオブジェクトを複製する。新しい一意 InstanceName を採番し、
+        /// 1.0 本体（RawData）は逐語コピーするので byte-exact round-trip。Position は +offsetXcm ずらす。
+        /// クローンを Entries とツリー両方に追加し、複製した SaveEntity を返す（3D 側で立方体追加・選択に使う）。
+        /// </summary>
+        public SaveEntity DuplicateByInstanceName(string instanceName, float offsetXcm = 300f)
+        {
+            if (string.IsNullOrEmpty(instanceName) || saveGame?.Entries == null || rootItem == null)
+                return null;
+
+            var src = saveGame.Entries.OfType<SaveEntity>().FirstOrDefault(e => e.InstanceName == instanceName);
+            if (src == null) return null;
+
+            // 3D ビューを開いている間にツリーから削除されたアクターは Entries に残るが live なツリーノードを失う。
+            // その状態で複製すると削除済みオブジェクトを復活させてしまうため、ツリーノードが残っている時だけ複製する。
+            if (rootItem.FindChild(instanceName, false) == null) return null;
+
+            // P0 止血: 参照を持つアクターを複製するとクローンと原本が同一コンポーネント／親を共有してゲームロードで破損する。
+            // 1.0+ の raw アクターは Components が未展開なので、RawData 先頭の data プレフィックス＋プロパティを読んで
+            // 参照の有無を判定する（SaveEntity.HasOutgoingReferences。電線等は "None" 整合確認＋ObjectProperty 検出の
+            // 二重防御で検出）。参照なし（Foundation 等）は複製を許可し、参照あり（コンポーネント／親／プロパティ参照）は
+            // 拒否して通知する。旧 ID→新 ID の参照書き換えは Stage3 の V2 ライターに依存（それまで複製は参照なしに限定）。
+            if (src.HasOutgoingReferences())
+            {
+                MessageBox.Show(Resources.MsgDuplicateRefUnsupported_Body, Resources.MsgDuplicateRefUnsupported_Title,
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return null;
+            }
+
+            var clone = new SaveEntity(src.TypePath, src.RootObject, MakeUniqueInstanceName(src.InstanceName))
+            {
+                ObjectFlags = src.ObjectFlags,
+                NeedTransform = src.NeedTransform,
+                WasPlacedInLevel = src.WasPlacedInLevel,
+                DataSaveVersion = src.DataSaveVersion,
+                ShouldMigrate = src.ShouldMigrate,
+                OptionalVersionData = src.OptionalVersionData, // byte[]（編集しないので参照コピー可）
+                RawData = src.RawData,                         // 1.0 本体は逐語コピー（InstanceName は RawData に無い）
+                DataFields = src.DataFields?.DeepClone(saveGame.Header.BuildVersion),                   // 旧形式用（1.0 では null）
+                ParentObjectRoot = src.ParentObjectRoot,
+                ParentObjectName = src.ParentObjectName,
+                Components = src.Components != null
+                    ? new System.Collections.Generic.List<SatisfactorySaveParser.Structures.ObjectReference>(src.Components)
+                    : new System.Collections.Generic.List<SatisfactorySaveParser.Structures.ObjectReference>(),
+            };
+
+            // Vector はクラス＝共有回避のため必ず new する（共有すると原本も動く）。未設定（null）なら複製側も未設定のまま。
+            var r = src.Rotation;
+            if (r != null) clone.Rotation = new SatisfactorySaveParser.Structures.Vector4 { X = r.X, Y = r.Y, Z = r.Z, W = r.W };
+            var s = src.Scale;
+            if (s != null) clone.Scale = new SatisfactorySaveParser.Structures.Vector3 { X = s.X, Y = s.Y, Z = s.Z };
+            var p = src.Position;
+            if (p != null) clone.Position = new SatisfactorySaveParser.Structures.Vector3 { X = p.X + offsetXcm, Y = p.Y, Z = p.Z };
+
+            // パーサ Entries に追加（保存の真実）。
+            saveGame.Entries.Add(clone);
+
+            // エディタツリーにも追加（DescendantSelf に乗せ、Save 時の Except 分岐で Entries 整合）。原本と同じ親の下へ。
+            var srcNode = rootItem.FindChild(src.InstanceName, false);
+            var parent = (srcNode != null ? FindParentOf(rootItem, srcNode) : null) ?? rootItem;
+            parent.Items.Add(new SaveEntityModel(clone));
+
+            OnPropertyChanged(nameof(RootItem));
+            HasUnsavedChanges = true;
+            return clone;
+        }
+
+        /// <summary>ツリーを再帰探索し、target を直接の子に持つ親ノードを返す（SaveObjectModel に Parent が無いため）。</summary>
+        private static SaveObjectModel FindParentOf(SaveObjectModel root, SaveObjectModel target)
+        {
+            if (root == null) return null;
+            foreach (var child in root.Items)
+            {
+                if (ReferenceEquals(child, target)) return root;
+                var found = FindParentOf(child, target);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>末尾の数値 id を置換し、既存 InstanceName と衝突しない一意名を返す（衝突は in-game の参照解決を壊す）。</summary>
+        private string MakeUniqueInstanceName(string original)
+        {
+            var existing = new System.Collections.Generic.HashSet<string>(saveGame.Entries.Select(e => e.InstanceName));
+            string prefix; long start;
+            int us = original.LastIndexOf('_');
+            if (us >= 0 && long.TryParse(original.Substring(us + 1), out start))
+                prefix = original.Substring(0, us + 1);
+            else { prefix = original + "_"; start = 0; }
+            for (long i = start + 1; ; i++)
+            {
+                var candidate = prefix + i.ToString(CultureInfo.InvariantCulture);
+                if (!existing.Contains(candidate)) return candidate;
+            }
         }
 
         /// <summary>
@@ -684,7 +1012,7 @@ namespace SatisfactorySaveEditor.ViewModel
             }
         }
 
-        private void Filter(string value)
+        private void Filter(string value, CancellationToken cancellationToken)
         {
             if (rootItem == null) return;
 
@@ -699,11 +1027,27 @@ namespace SatisfactorySaveEditor.ViewModel
             else
             {
                 var valueLower = value.ToLower(CultureInfo.InvariantCulture);
-                var filter = rootItem.DescendantSelfViewModel.WithCancellation(tokenSource.Token).Where(vm => vm.MatchesFilter(valueLower));
-                Application.Current.Dispatcher.Invoke(() =>
+                try
                 {
-                    RootItem = new ObservableCollection<SaveObjectModel>(filter);
-                });
+                    // 背景スレッドで列挙を完了させてから（UI を塞がない）、UI スレッドへは確定済みリストだけ渡す。
+                    // Dispatcher 内での遅延列挙中に 3D 操作でツリーが変わって並行例外になる窓を無くす。
+                    var filtered = rootItem.DescendantSelfViewModelLazy
+                        .WithCancellation(cancellationToken)
+                        .Where(vm => vm.MatchesFilter(valueLower))
+                        .ToList();
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        RootItem = new ObservableCollection<SaveObjectModel>(filtered);
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    // 新しい検索語に置き換わった（tokenSource.Cancel）。古い列挙は破棄してよい。
+                }
+                catch (InvalidOperationException)
+                {
+                    // 列挙中に 3D 操作等でツリーが変更された。次の打鍵で再評価されるため無視する。
+                }
             }
         }
 

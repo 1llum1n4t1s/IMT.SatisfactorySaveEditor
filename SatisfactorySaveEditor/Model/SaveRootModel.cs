@@ -66,6 +66,7 @@ namespace SatisfactorySaveEditor.Model
         {
             model = header;
             Type = "Root";
+            DisplayName = header.SessionName; // ルートはセッション名をそのまま見せる（整形しない）
 
             buildVersion = model.BuildVersion;
             mapName = model.MapName;

@@ -20,7 +20,7 @@ namespace SatisfactorySaveParser
 
         public void Serialize(BinaryWriter writer, int buildVersion)
         {
-            if (ShouldBeNulled && Count == 0 && TrailingData.Length == 0)
+            if (ShouldBeNulled && Count == 0 && (TrailingData == null || TrailingData.Length == 0))
                 return;
 
             foreach (var field in this)
@@ -82,6 +82,20 @@ namespace SatisfactorySaveParser
 
 
             return result;
+        }
+
+        /// <summary>このフィールド列を直列化→再パースして完全な deep copy を作る。複製時に原本と
+        /// 要素（SerializedProperty）/ ShouldBeNulled / TrailingData を共有せず、片方の編集が他方へ波及しない。</summary>
+        public SerializedFields DeepClone(int buildVersion)
+        {
+            using (var ms = new MemoryStream())
+            {
+                using (var w = new BinaryWriter(ms, new System.Text.UTF8Encoding(false), true))
+                    Serialize(w, buildVersion);
+                ms.Position = 0;
+                using (var r = new BinaryReader(ms))
+                    return Parse((int)ms.Length, r, buildVersion);
+            }
         }
     }
 }

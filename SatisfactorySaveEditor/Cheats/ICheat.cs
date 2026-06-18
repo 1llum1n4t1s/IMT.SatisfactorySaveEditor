@@ -6,7 +6,12 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public interface ICheat
     {
-        string Name { get; }
+        /// <summary>
+        ///     チートメニュー項目の表示名を解決するための resx キー（例 "CheatNoCost"）。
+        ///     実際の表示文字列は <see cref="Converter.CheatNameConverter"/> 経由でローカライズされ、
+        ///     言語切替にもランタイムで追従する。
+        /// </summary>
+        string NameKey { get; }
 
         /// <summary>
         ///     Activate the cheat

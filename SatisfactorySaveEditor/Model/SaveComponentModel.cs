@@ -24,9 +24,16 @@ namespace SatisfactorySaveEditor.Model
             set { SetProperty(ref parentEntityName, value, nameof(ParentEntityName)); }
         }
 
-        public RelayCommand FillInventoryCommand => new RelayCommand(FillInventory);
+        private RelayCommand fillInventoryCommand;
+        private RelayCommand emptyInventoryCommand;
 
-        public RelayCommand EmptyInventoryCommand => new RelayCommand(EmptyInventory);
+        // 1.0+ raw V2 コンポーネント（DataFields==null）は mInventoryStacks を持たず Inventory==null。
+        // その場合コマンドを無効化し、Fill/Empty 実行時の inv.Elements 参照クラッシュを防ぐ。
+        // WPF バインディングはコマンドの同一性を前提とするため、プロパティアクセスごとに new せず
+        // 遅延初期化で 1 度だけ生成して使い回す（CanExecuteChanged 伝播・割り当て削減のため）。
+        public RelayCommand FillInventoryCommand => fillInventoryCommand ??= new RelayCommand(FillInventory, () => Inventory != null);
+
+        public RelayCommand EmptyInventoryCommand => emptyInventoryCommand ??= new RelayCommand(EmptyInventory, () => Inventory != null);
 
         public SaveComponentModel(SaveComponent sc) : base(sc)
         {
@@ -66,6 +73,7 @@ namespace SatisfactorySaveEditor.Model
 
         private void FillInventory()
         {
+            if (Inventory == null) return; // raw V2 コンポーネント等で在庫プロパティが無い場合は何もしない（クラッシュ防止）
             FillWindow dialog = new FillWindow();
             FillViewModel fvm = (FillViewModel) dialog.DataContext;
             dialog.ShowDialog();
@@ -86,6 +94,7 @@ namespace SatisfactorySaveEditor.Model
         private void EmptyInventory()
         {
             var inv = this.Inventory;
+            if (inv == null) return; // raw V2 コンポーネント等で在庫プロパティが無い場合は何もしない（クラッシュ防止）
             foreach (StructPropertyViewModel element in inv.Elements)
             {
                 DynamicStructDataViewModel structData = (DynamicStructDataViewModel)element.StructData;

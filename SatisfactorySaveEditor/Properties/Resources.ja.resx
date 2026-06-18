@@ -49,6 +49,24 @@
   <data name="MenuHelp" xml:space="preserve">
     <value>ヘルプ(_H)</value>
   </data>
+  <data name="Menu3DView" xml:space="preserve">
+    <value>3Dビュー(_3)</value>
+  </data>
+  <data name="World3DTitle" xml:space="preserve">
+    <value>3D ワールドビュー — Satisfactory Save Editor</value>
+  </data>
+  <data name="World3DControlsHelp" xml:space="preserve">
+    <value>WASD=移動 / Q・Z=上下 / 右ドラッグ=回転 / ホイール=ズーム / 左クリック=選択 / Delete=削除 / Ctrl+D=複製</value>
+  </data>
+  <data name="MsgCheatUnsupportedV2_Title" xml:space="preserve">
+    <value>1.0以降のセーブでは未対応</value>
+  </data>
+  <data name="MsgCheatUnsupportedV2_Body" xml:space="preserve">
+    <value>チートはパース済みのオブジェクトプロパティに依存しますが、1.0以降（パーティション）セーブではまだ展開されていません（オブジェクトは生バイトのまま・DataFields が null）。チートを実行すると存在しないフィールドを参照するか変更が黙って失われるため、V2 プロパティ編集に対応するまでこのセーブ形式では無効です。</value>
+  </data>
+  <data name="Msg3DNoSave_Body" xml:space="preserve">
+    <value>先にセーブファイルを開いてください。</value>
+  </data>
   <data name="MenuViewGuidesFicsit" xml:space="preserve">
     <value>ficsit.app でガイドを見る</value>
   </data>
@@ -319,6 +337,9 @@
   <data name="ButtonDone" xml:space="preserve">
     <value>完了(_D)</value>
   </data>
+  <data name="ButtonHelp" xml:space="preserve">
+    <value>ヘルプ(_H)</value>
+  </data>
   <data name="MassDismantleTitle" xml:space="preserve">
     <value>一括削除</value>
   </data>
@@ -416,6 +437,27 @@ Persistent_Level:PersistentLevel.Char_Player_C_0.inventory</value>
   </data>
   <data name="MsgErrorOpeningFile_Title" xml:space="preserve">
     <value>ファイルを開けませんでした</value>
+  </data>
+  <data name="MsgSaveFailed_Title" xml:space="preserve">
+    <value>保存に失敗しました</value>
+  </data>
+  <data name="MsgSaveFailed_Body" xml:space="preserve">
+    <value>セーブファイルを書き込めませんでした:
+{0}
+
+元のファイルは変更されていません。詳細はログを確認してください。</value>
+  </data>
+  <data name="MsgDuplicateRefUnsupported_Title" xml:space="preserve">
+    <value>複製は未対応です</value>
+  </data>
+  <data name="MsgDuplicateRefUnsupported_Body" xml:space="preserve">
+    <value>このオブジェクトはコンポーネント（インベントリ・接続など）を持っています。複製すると、コピーと原本が同じコンポーネントを共有し、ゲームロード時にセーブが破損します。参照を持つオブジェクトの複製はまだ対応していません。</value>
+  </data>
+  <data name="MsgDeleteRefUnsupported_Title" xml:space="preserve">
+    <value>削除は未対応です</value>
+  </data>
+  <data name="MsgDeleteRefUnsupported_Body" xml:space="preserve">
+    <value>このオブジェクトはコンポーネント（インベントリ・接続など）をツリーの別の場所に持っています。このアクターだけ削除するとコンポーネントが孤立し、ゲームロード時にセーブが破損します。参照を持つオブジェクトの削除はまだ対応していません。</value>
   </data>
   <data name="MsgEditorName_Caption" xml:space="preserve">
     <value>Satisfactory セーブ エディター</value>
@@ -692,5 +734,59 @@ Persistent_Level:PersistentLevel.Char_Player_C_0.inventory</value>
   </data>
   <data name="MsgMapUnlocked_Body" xml:space="preserve">
     <value>マップを解放しました</value>
+  </data>
+  <data name="CheatUnlockResearch" xml:space="preserve">
+    <value>研究を解除</value>
+  </data>
+  <data name="CheatUnlockMap" xml:space="preserve">
+    <value>マップを解放</value>
+  </data>
+  <data name="CheatUncoverMap" xml:space="preserve">
+    <value>マップ全体を踏破...</value>
+  </data>
+  <data name="CheatInventorySlots" xml:space="preserve">
+    <value>インベントリスロット数を設定...</value>
+  </data>
+  <data name="CheatArmSlots" xml:space="preserve">
+    <value>アームスロット数を設定...</value>
+  </data>
+  <data name="CheatKillDummyPlayers" xml:space="preserve">
+    <value>ダミープレイヤーを削除</value>
+  </data>
+  <data name="CheatSetCoupons" xml:space="preserve">
+    <value>AWESOMEシンクのクーポン累計獲得数を設定...</value>
+  </data>
+  <data name="CheatDeleteEnemies" xml:space="preserve">
+    <value>敵を削除</value>
+  </data>
+  <data name="CheatUndoDeleteEnemies" xml:space="preserve">
+    <value>敵の削除を元に戻す</value>
+  </data>
+  <data name="CheatSpawnDoggos" xml:space="preserve">
+    <value>ロンリーロイをスポーン...</value>
+  </data>
+  <data name="CheatMassDismantle" xml:space="preserve">
+    <value>一括解体...</value>
+  </data>
+  <data name="CheatEverythingBox" xml:space="preserve">
+    <value>全アイテム入りクレートを作成...</value>
+  </data>
+  <data name="CheatTeleportCrates" xml:space="preserve">
+    <value>クレートをホストプレイヤーへテレポート</value>
+  </data>
+  <data name="CheatNoCost" xml:space="preserve">
+    <value>建設コストなしを切り替え</value>
+  </data>
+  <data name="CheatNoPowerCost" xml:space="preserve">
+    <value>電力コストなしを切り替え</value>
+  </data>
+  <data name="CheatRemoveSlugs" xml:space="preserve">
+    <value>パワースラグを除去</value>
+  </data>
+  <data name="CheatRestoreSlugs" xml:space="preserve">
+    <value>パワースラグを復元</value>
+  </data>
+  <data name="CheatDeduplicateSchematics" xml:space="preserve">
+    <value>スキマティックの重複を削除</value>
   </data>
 </root>

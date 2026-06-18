@@ -345,3 +345,6 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /SatisfactorySaveEditor.sln.DotSettings
+
+# Serena MCP のローカルキャッシュ・メモリ（ツール状態。コミット対象外）
+.serena/

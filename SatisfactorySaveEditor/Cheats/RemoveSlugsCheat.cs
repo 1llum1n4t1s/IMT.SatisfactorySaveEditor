@@ -13,7 +13,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class RemoveSlugsCheat : ICheat
     {
-        public string Name => "Remove slugs";
+        public string NameKey => "CheatRemoveSlugs";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

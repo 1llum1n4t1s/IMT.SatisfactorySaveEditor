@@ -10,7 +10,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class UnlockMapCheat : ICheat
     {
-        public string Name => "Unlock map";
+        public string NameKey => "CheatUnlockMap";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

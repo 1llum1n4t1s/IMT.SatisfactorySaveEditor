@@ -16,7 +16,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class ResearchUnlockCheat : ICheat
     {
-        public string Name => "Unlock research";
+        public string NameKey => "CheatUnlockResearch";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

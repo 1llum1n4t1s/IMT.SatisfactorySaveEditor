@@ -17,7 +17,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     class EverythingBoxCheat : ICheat
     {
-        public string Name => "Create crate with all items...";
+        public string NameKey => "CheatEverythingBox";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

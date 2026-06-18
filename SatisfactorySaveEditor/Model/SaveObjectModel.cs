@@ -17,6 +17,7 @@ namespace SatisfactorySaveEditor.Model
     public class SaveObjectModel : ObservableObject
     {
         private string title;
+        private string displayName;
         private string rootObject;
         private string type;
         private bool isSelected;
@@ -63,10 +64,36 @@ namespace SatisfactorySaveEditor.Model
             }
         }
 
+        /// <summary>
+        ///     DescendantSelfViewModel の遅延列挙版。検索フィルタが WithCancellation で
+        ///     キャンセルされたとき、フル List をマテリアライズせず途中で列挙を打ち切れる。
+        ///     列挙中にツリー構造を変更しないこと（変更を伴うチートは List 版 DescendantSelfViewModel を使う）。
+        /// </summary>
+        public IEnumerable<SaveObjectModel> DescendantSelfViewModelLazy
+        {
+            get
+            {
+                if (Model != null) yield return this;
+                foreach (var item in Items)
+                    foreach (var descendant in item.DescendantSelfViewModelLazy)
+                        yield return descendant;
+            }
+        }
+
         public string Title
         {
             get => title;
             set { SetProperty(ref title, value, nameof(Title)); }
+        }
+
+        /// <summary>
+        ///     ツリーに表示する人間可読ラベル（表示専用）。生の Title/InstanceName/クラスパスを
+        ///     <see cref="FriendlyName"/> で整形したもの。検索・コピー・保存は引き続き <see cref="Title"/> 等の生名を使う。
+        /// </summary>
+        public string DisplayName
+        {
+            get => displayName;
+            set { SetProperty(ref displayName, value, nameof(DisplayName)); }
         }
 
         public string RootObject
@@ -100,13 +127,18 @@ namespace SatisfactorySaveEditor.Model
             Model = model;
             Title = model.InstanceName;
             RootObject = model.RootObject;
-            Type = model.TypePath.Split('/').Last();
+            Type = !string.IsNullOrEmpty(model.TypePath) ? model.TypePath.Split('/').Last() : string.Empty;
+            DisplayName = FriendlyName.Pretty(!string.IsNullOrEmpty(model.TypePath) ? model.TypePath : model.InstanceName);
 
-            Fields = new ObservableCollection<SerializedPropertyViewModel>(Model.DataFields.Select(PropertyViewModelMapper.Convert));
+            // 1.0+ 新形式で内部データを未パース保持しているオブジェクト（DataFields==null, RawData 保持）は
+            // プロパティ列を持たない（プロパティ編集は後段で対応）。ツリー表示・トランスフォーム編集は可能。
+            Fields = Model.DataFields != null
+                ? new ObservableCollection<SerializedPropertyViewModel>(Model.DataFields.Select(PropertyViewModelMapper.Convert))
+                : new ObservableCollection<SerializedPropertyViewModel>();
 
             CopyNameCommand = new RelayCommand(CopyName);
             CopyPathCommand = new RelayCommand(CopyPath);
-            AddPropertyCommand = new RelayCommand(AddProperty);
+            AddPropertyCommand = new RelayCommand(AddProperty, CanAddProperty);
             RemovePropertyCommand = new RelayCommand<SerializedPropertyViewModel>(RemoveProperty);
         }
 
@@ -114,6 +146,7 @@ namespace SatisfactorySaveEditor.Model
         {
             Title = title;
             Type = title;
+            DisplayName = FriendlyName.Pretty(title);
 
             CopyNameCommand = new RelayCommand(CopyName);
         }
@@ -183,14 +216,22 @@ namespace SatisfactorySaveEditor.Model
             // This is because the named only (pink) nodes aren't actually a valid object in the game
             if (Model == null) return;
 
-            Model.InstanceName = Title;
+            // raw V2（RawData 保持・DataFields==null）は InstanceName を含む内部参照が未パースのため、
+            // リネームすると保存時に RawData 内の参照と食い違う。プロパティ編集対応（Stage3）まで変更を抑止する。
+            if (Model.DataFields != null || Model.RawData == null)
+                Model.InstanceName = Title;
 
-            var newObjects = Fields.Select(vm => vm.Model).ToList();
-            Model.DataFields.RemoveAll(s => !newObjects.Contains(s));
-            newObjects.RemoveAll(s => Model.DataFields.Contains(s));
-            Model.DataFields.AddRange(newObjects);
+            // 1.0+ 新形式で内部データ未パース（DataFields==null）の場合はプロパティの反映をスキップする。
+            // RawData がそのまま書き戻されるため round-trip は保たれる。
+            if (Model.DataFields != null)
+            {
+                var newObjects = Fields.Select(vm => vm.Model).ToList();
+                Model.DataFields.RemoveAll(s => !newObjects.Contains(s));
+                newObjects.RemoveAll(s => Model.DataFields.Contains(s));
+                Model.DataFields.AddRange(newObjects);
 
-            foreach (var field in Fields) field.ApplyChanges();
+                foreach (var field in Fields) field.ApplyChanges();
+            }
         }
 
         public T FindField<T>(string fieldName, Action<T> edit = null) where T : SerializedPropertyViewModel
@@ -236,11 +277,26 @@ namespace SatisfactorySaveEditor.Model
 
         public virtual bool MatchesFilter(string filter)
         {
-            return this.Model?.InstanceName.ToLower(CultureInfo.InvariantCulture).Contains(filter) ?? false;
+            // フレンドリー名・生クラスパス(Title)・インスタンス名のいずれでも引けるようにする。
+            // .NET 10 の StringComparison.OrdinalIgnoreCase でアロケーションフリーに大小無視比較する。
+            if (DisplayName != null && DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (Title != null && Title.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return this.Model?.InstanceName?.Contains(filter, StringComparison.OrdinalIgnoreCase) ?? false;
         }
+
+        // raw V2（RawData 保持・DataFields==null）はプロパティ列が未パースのため、
+        // Add Property を許可すると追加プロパティが ApplyChanges でスキップされ保存に残らない。
+        // 編集可能（パース済み or レガシー＝DataFields 保持、または RawData 無し）に限り許可する。
+        private bool CanAddProperty() => Model != null && (Model.DataFields != null || Model.RawData == null);
 
         private void AddProperty()
         {
+            if (!CanAddProperty()) return;
+
             AddWindow window = new AddWindow
             {
                 Owner = Application.Current.MainWindow

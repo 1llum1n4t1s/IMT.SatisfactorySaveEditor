@@ -12,7 +12,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class DeduplicateSchematicsCheat : ICheat
     {
-        public string Name => "Deduplicate schematics";
+        public string NameKey => "CheatDeduplicateSchematics";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

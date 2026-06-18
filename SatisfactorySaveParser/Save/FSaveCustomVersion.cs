@@ -90,8 +90,20 @@
         // 2021-09-21 Migrate FGTrain from native only to a blueprint class BP_Train.
         TrainBlueprintClassAdded,
 
+        // -----<Update 6〜1.x で追加された節目。中間バージョンは省略し明示値で定義>-----
+        // 旧 Update 5 までは連番。1.0 系（ワールドパーティション）対応に必要なゲート番号のみ明示する。
+
+        // SaveVersion>=49: オブジェクトヘッダー(FActor/FObjectSaveHeader)に ObjectFlags(uint32) を追加
+        AddedObjectFlagsToHeader = 49,
+
+        // SaveVersion>=51: FPerStreamingLevelSaveData に per-level SaveVersion(int32) を追加
+        AddedPerStreamingLevelSaveVersion = 51,
+
+        // SaveVersion>=53: ボディ先頭 / per-level / per-object に FSaveObjectVersionData を追加
+        AddedSaveObjectVersionData = 53,
+
+        // 現行サポート上限（Satisfactory 1.2 = SaveVersion 60）
         // -----<new versions can be added above this line>-------------------------------------------------
-        VersionPlusOne,
-        LatestVersion = VersionPlusOne - 1
+        LatestVersion = 60
     };
 }

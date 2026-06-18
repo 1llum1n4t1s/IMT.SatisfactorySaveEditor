@@ -49,6 +49,24 @@
   <data name="MenuHelp" xml:space="preserve">
     <value>_Help</value>
   </data>
+  <data name="Menu3DView" xml:space="preserve">
+    <value>_3D View</value>
+  </data>
+  <data name="World3DTitle" xml:space="preserve">
+    <value>3D World View — Satisfactory Save Editor</value>
+  </data>
+  <data name="World3DControlsHelp" xml:space="preserve">
+    <value>WASD=Move / Q·Z=Up·Down / Right-drag=Rotate / Wheel=Zoom / Left-click=Select / Delete=Delete / Ctrl+D=Duplicate</value>
+  </data>
+  <data name="MsgCheatUnsupportedV2_Title" xml:space="preserve">
+    <value>Not supported on 1.0+ saves</value>
+  </data>
+  <data name="MsgCheatUnsupportedV2_Body" xml:space="preserve">
+    <value>Cheats rely on parsed object properties, which 1.0+ (partitioned) saves do not expose yet — objects keep their raw bytes (DataFields is null). Running a cheat would dereference a missing field or silently lose the change, so cheats are disabled for this save format until V2 property editing lands.</value>
+  </data>
+  <data name="Msg3DNoSave_Body" xml:space="preserve">
+    <value>Open a save file first to view it in 3D.</value>
+  </data>
   <data name="MenuViewGuidesFicsit" xml:space="preserve">
     <value>View guides on ficsit.app</value>
   </data>
@@ -319,6 +337,9 @@
   <data name="ButtonDone" xml:space="preserve">
     <value>_Done</value>
   </data>
+  <data name="ButtonHelp" xml:space="preserve">
+    <value>_Help</value>
+  </data>
   <data name="MassDismantleTitle" xml:space="preserve">
     <value>Mass delete</value>
   </data>
@@ -416,6 +437,27 @@ If this issue persists, please report it via "Help &gt; Report an Issue", and at
   </data>
   <data name="MsgErrorOpeningFile_Title" xml:space="preserve">
     <value>Error opening file</value>
+  </data>
+  <data name="MsgSaveFailed_Title" xml:space="preserve">
+    <value>Save failed</value>
+  </data>
+  <data name="MsgSaveFailed_Body" xml:space="preserve">
+    <value>The save file could not be written:
+{0}
+
+Your original file is unchanged. Check the logs for more details.</value>
+  </data>
+  <data name="MsgDuplicateRefUnsupported_Title" xml:space="preserve">
+    <value>Duplicate not supported</value>
+  </data>
+  <data name="MsgDuplicateRefUnsupported_Body" xml:space="preserve">
+    <value>This object has components (inventory, connections, etc.). Duplicating it would make the copy and the original share the same components and corrupt the save on load. Duplicating objects that hold references is not supported yet.</value>
+  </data>
+  <data name="MsgDeleteRefUnsupported_Title" xml:space="preserve">
+    <value>Delete not supported</value>
+  </data>
+  <data name="MsgDeleteRefUnsupported_Body" xml:space="preserve">
+    <value>This object has components (inventory, connections, etc.) stored elsewhere in the tree. Deleting only this actor would orphan those components and corrupt the save on load. Deleting objects that hold references is not supported yet.</value>
   </data>
   <data name="MsgEditorName_Caption" xml:space="preserve">
     <value>Satisfactory Save Editor</value>
@@ -692,5 +734,59 @@ This means that the loaded save is probably corrupt. Aborting.</value>
   </data>
   <data name="MsgMapUnlocked_Body" xml:space="preserve">
     <value>Map unlocked</value>
+  </data>
+  <data name="CheatUnlockResearch" xml:space="preserve">
+    <value>Unlock research</value>
+  </data>
+  <data name="CheatUnlockMap" xml:space="preserve">
+    <value>Unlock map</value>
+  </data>
+  <data name="CheatUncoverMap" xml:space="preserve">
+    <value>Uncover entire map...</value>
+  </data>
+  <data name="CheatInventorySlots" xml:space="preserve">
+    <value>Set inventory slot count...</value>
+  </data>
+  <data name="CheatArmSlots" xml:space="preserve">
+    <value>Set arm slot count...</value>
+  </data>
+  <data name="CheatKillDummyPlayers" xml:space="preserve">
+    <value>Kill dummy players</value>
+  </data>
+  <data name="CheatSetCoupons" xml:space="preserve">
+    <value>Set AWESOME Sink coupons accumulated...</value>
+  </data>
+  <data name="CheatDeleteEnemies" xml:space="preserve">
+    <value>Delete enemies</value>
+  </data>
+  <data name="CheatUndoDeleteEnemies" xml:space="preserve">
+    <value>Undo delete enemies</value>
+  </data>
+  <data name="CheatSpawnDoggos" xml:space="preserve">
+    <value>Spawn doggos...</value>
+  </data>
+  <data name="CheatMassDismantle" xml:space="preserve">
+    <value>Mass dismantle...</value>
+  </data>
+  <data name="CheatEverythingBox" xml:space="preserve">
+    <value>Create crate with all items...</value>
+  </data>
+  <data name="CheatTeleportCrates" xml:space="preserve">
+    <value>Teleport crates to host player</value>
+  </data>
+  <data name="CheatNoCost" xml:space="preserve">
+    <value>Toggle no build cost</value>
+  </data>
+  <data name="CheatNoPowerCost" xml:space="preserve">
+    <value>Toggle no power cost</value>
+  </data>
+  <data name="CheatRemoveSlugs" xml:space="preserve">
+    <value>Remove slugs</value>
+  </data>
+  <data name="CheatRestoreSlugs" xml:space="preserve">
+    <value>Restore slugs</value>
+  </data>
+  <data name="CheatDeduplicateSchematics" xml:space="preserve">
+    <value>Deduplicate schematics</value>
   </data>
 </root>

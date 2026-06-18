@@ -13,7 +13,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class RevealMapCheat : ICheat
     {
-        public string Name => "Uncover entire map";
+        public string NameKey => "CheatUncoverMap";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {

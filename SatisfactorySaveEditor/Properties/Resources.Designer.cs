@@ -48,6 +48,12 @@ namespace SatisfactorySaveEditor.Properties
         public static string MenuExit => ResourceManager.GetString("MenuExit", resourceCulture);
         public static string MenuCheats => ResourceManager.GetString("MenuCheats", resourceCulture);
         public static string MenuHelp => ResourceManager.GetString("MenuHelp", resourceCulture);
+        public static string Menu3DView => ResourceManager.GetString("Menu3DView", resourceCulture);
+        public static string World3DTitle => ResourceManager.GetString("World3DTitle", resourceCulture);
+        public static string World3DControlsHelp => ResourceManager.GetString("World3DControlsHelp", resourceCulture);
+        public static string MsgCheatUnsupportedV2_Title => ResourceManager.GetString("MsgCheatUnsupportedV2_Title", resourceCulture);
+        public static string MsgCheatUnsupportedV2_Body => ResourceManager.GetString("MsgCheatUnsupportedV2_Body", resourceCulture);
+        public static string Msg3DNoSave_Body => ResourceManager.GetString("Msg3DNoSave_Body", resourceCulture);
         public static string MenuViewGuidesFicsit => ResourceManager.GetString("MenuViewGuidesFicsit", resourceCulture);
         public static string MenuRequestHelpDiscord => ResourceManager.GetString("MenuRequestHelpDiscord", resourceCulture);
         public static string MenuViewOnGitHub => ResourceManager.GetString("MenuViewOnGitHub", resourceCulture);
@@ -166,6 +172,12 @@ namespace SatisfactorySaveEditor.Properties
         public static string MsgFileNotPresent_Title => ResourceManager.GetString("MsgFileNotPresent_Title", resourceCulture);
         public static string MsgOpenFileError_Body => ResourceManager.GetString("MsgOpenFileError_Body", resourceCulture);
         public static string MsgErrorOpeningFile_Title => ResourceManager.GetString("MsgErrorOpeningFile_Title", resourceCulture);
+        public static string MsgSaveFailed_Title => ResourceManager.GetString("MsgSaveFailed_Title", resourceCulture);
+        public static string MsgSaveFailed_Body => ResourceManager.GetString("MsgSaveFailed_Body", resourceCulture);
+        public static string MsgDuplicateRefUnsupported_Title => ResourceManager.GetString("MsgDuplicateRefUnsupported_Title", resourceCulture);
+        public static string MsgDuplicateRefUnsupported_Body => ResourceManager.GetString("MsgDuplicateRefUnsupported_Body", resourceCulture);
+        public static string MsgDeleteRefUnsupported_Title => ResourceManager.GetString("MsgDeleteRefUnsupported_Title", resourceCulture);
+        public static string MsgDeleteRefUnsupported_Body => ResourceManager.GetString("MsgDeleteRefUnsupported_Body", resourceCulture);
         public static string MsgEditorName_Caption => ResourceManager.GetString("MsgEditorName_Caption", resourceCulture);
         public static string MsgAutoUpdateDisabled_Body => ResourceManager.GetString("MsgAutoUpdateDisabled_Body", resourceCulture);
         public static string PromptString_Title => ResourceManager.GetString("PromptString_Title", resourceCulture);
@@ -248,5 +260,24 @@ namespace SatisfactorySaveEditor.Properties
         public static string MsgDoggoCannotSpawn_Body => ResourceManager.GetString("MsgDoggoCannotSpawn_Body", resourceCulture);
         public static string MsgNoUnlockSubsystemMap_Body => ResourceManager.GetString("MsgNoUnlockSubsystemMap_Body", resourceCulture);
         public static string MsgMapUnlocked_Body => ResourceManager.GetString("MsgMapUnlocked_Body", resourceCulture);
+        public static string CheatUnlockResearch => ResourceManager.GetString("CheatUnlockResearch", resourceCulture);
+        public static string CheatUnlockMap => ResourceManager.GetString("CheatUnlockMap", resourceCulture);
+        public static string CheatUncoverMap => ResourceManager.GetString("CheatUncoverMap", resourceCulture);
+        public static string CheatInventorySlots => ResourceManager.GetString("CheatInventorySlots", resourceCulture);
+        public static string CheatArmSlots => ResourceManager.GetString("CheatArmSlots", resourceCulture);
+        public static string CheatKillDummyPlayers => ResourceManager.GetString("CheatKillDummyPlayers", resourceCulture);
+        public static string CheatSetCoupons => ResourceManager.GetString("CheatSetCoupons", resourceCulture);
+        public static string CheatDeleteEnemies => ResourceManager.GetString("CheatDeleteEnemies", resourceCulture);
+        public static string CheatUndoDeleteEnemies => ResourceManager.GetString("CheatUndoDeleteEnemies", resourceCulture);
+        public static string CheatSpawnDoggos => ResourceManager.GetString("CheatSpawnDoggos", resourceCulture);
+        public static string CheatMassDismantle => ResourceManager.GetString("CheatMassDismantle", resourceCulture);
+        public static string CheatEverythingBox => ResourceManager.GetString("CheatEverythingBox", resourceCulture);
+        public static string CheatTeleportCrates => ResourceManager.GetString("CheatTeleportCrates", resourceCulture);
+        public static string CheatNoCost => ResourceManager.GetString("CheatNoCost", resourceCulture);
+        public static string CheatNoPowerCost => ResourceManager.GetString("CheatNoPowerCost", resourceCulture);
+        public static string CheatRemoveSlugs => ResourceManager.GetString("CheatRemoveSlugs", resourceCulture);
+        public static string CheatRestoreSlugs => ResourceManager.GetString("CheatRestoreSlugs", resourceCulture);
+        public static string CheatDeduplicateSchematics => ResourceManager.GetString("CheatDeduplicateSchematics", resourceCulture);
+        public static string ButtonHelp => ResourceManager.GetString("ButtonHelp", resourceCulture);
     }
 }

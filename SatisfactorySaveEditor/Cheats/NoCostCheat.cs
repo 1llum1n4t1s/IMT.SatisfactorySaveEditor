@@ -10,7 +10,7 @@ namespace SatisfactorySaveEditor.Cheats
 {
     public class NoCostCheat : ICheat
     {
-        public string Name => "Toggle no build cost";
+        public string NameKey => "CheatNoCost";
 
         public bool Apply(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {
