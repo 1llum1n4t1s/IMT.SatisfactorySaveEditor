@@ -279,6 +279,14 @@ namespace SatisfactorySaveEditor.ViewModel
         /// <param name="model">The model to delete</param>
         private void Delete(SaveObjectModel model)
         {
+            // 3D 削除と同じ参照ガード（DeleteByEntity）を通す。1.0 raw V2 の参照保持アクター／コンポーネントを
+            // ツリーから削除すると、不透明な RawData が消えたノードを指したまま保存され孤児化するため。
+            if (model?.Model != null)
+            {
+                DeleteByEntity(model.Model);
+                return;
+            }
+            // Model を持たない擬似ノード（名前のみのピンクノード）は従来通り単純除去。
             rootItem.Remove(model);
             OnPropertyChanged(nameof(RootItem));
         }
@@ -647,7 +655,11 @@ namespace SatisfactorySaveEditor.ViewModel
             // コンポーネント／親／参照を持つアクターを 3D 削除すると、TypePath で別グループに並ぶコンポーネントが
             // 存在しないアクターを指す OuterPathName で書き戻され孤児化する。完全な参照 prune は Stage3 まで未対応
             // なので、参照を持つアクターの削除は拒否する（複製ガードと対称）。
-            if (target is SatisfactorySaveParser.SaveEntity refEnt && refEnt.HasOutgoingReferences())
+            // 参照を持つアクター（コンポーネント／親／プロパティ参照）の削除は孤児化を生むため拒否（複製ガードと対称）。
+            // コンポーネント自体も親アクターの未パース RawData から参照されるため、raw V2 の間は単独削除も拒否する。
+            bool refersOut = target is SatisfactorySaveParser.SaveEntity refEnt && refEnt.HasOutgoingReferences();
+            bool rawComponent = target is SatisfactorySaveParser.SaveComponent && target.DataFields == null && target.RawData != null;
+            if (refersOut || rawComponent)
             {
                 MessageBox.Show(Resources.MsgDeleteRefUnsupported_Body, Resources.MsgDeleteRefUnsupported_Title,
                     MessageBoxButton.OK, MessageBoxImage.Warning);

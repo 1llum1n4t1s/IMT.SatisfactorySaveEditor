@@ -539,7 +539,7 @@ namespace SatisfactorySaveEditor.View
                 var hits = viewport.FindHits(up); // Distance 昇順
                 // 統合キューブモデルへの最初の有効ヒット。
                 var hit = hits?.FirstOrDefault(h => h.IsValid && ReferenceEquals(h.ModelHit, boxModel));
-                if (hit == null || cubeEntities == null) { ClearHighlight(); ClearDetails(); return; }
+                if (hit == null || cubeEntities == null) { ClearHighlight(); ClearDetails(); selectedCubeIndex = -1; return; }
 
                 // merged-mesh 不変条件: キューブ i は 頂点[i*8..i*8+7] / index[i*36..i*36+35] を専有。
                 // TriangleIndices = ヒット三角形の 3 頂点 index（3 つとも同じキューブ序数）。
@@ -550,7 +550,7 @@ namespace SatisfactorySaveEditor.View
                 else if (hit.IndiceStartLocation >= 0) // TriangleIndices が null の場合のフォールバック
                     cubeIndex = hit.IndiceStartLocation / 36;
 
-                if (cubeIndex < 0 || cubeIndex >= cubeEntities.Length) { ClearHighlight(); return; }
+                if (cubeIndex < 0 || cubeIndex >= cubeEntities.Length) { ClearHighlight(); ClearDetails(); selectedCubeIndex = -1; return; }
 
                 var ent = cubeEntities[cubeIndex];
                 if (ent == null) { ClearHighlight(); ClearDetails(); selectedCubeIndex = -1; return; } // 縮退削除済みは選択不可
