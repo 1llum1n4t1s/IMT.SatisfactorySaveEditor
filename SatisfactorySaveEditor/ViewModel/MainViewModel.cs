@@ -644,6 +644,15 @@ namespace SatisfactorySaveEditor.ViewModel
         public bool DeleteByEntity(SatisfactorySaveParser.SaveObject target)
         {
             if (target == null || rootItem == null) return false;
+            // コンポーネント／親／参照を持つアクターを 3D 削除すると、TypePath で別グループに並ぶコンポーネントが
+            // 存在しないアクターを指す OuterPathName で書き戻され孤児化する。完全な参照 prune は Stage3 まで未対応
+            // なので、参照を持つアクターの削除は拒否する（複製ガードと対称）。
+            if (target is SatisfactorySaveParser.SaveEntity refEnt && refEnt.HasOutgoingReferences())
+            {
+                MessageBox.Show(Resources.MsgDeleteRefUnsupported_Body, Resources.MsgDeleteRefUnsupported_Title,
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
             var m = FindNodeByModel(rootItem, target);
             if (m == null || m == rootItem) return false;
             rootItem.Remove(m);
@@ -687,7 +696,7 @@ namespace SatisfactorySaveEditor.ViewModel
                 ShouldMigrate = src.ShouldMigrate,
                 OptionalVersionData = src.OptionalVersionData, // byte[]（編集しないので参照コピー可）
                 RawData = src.RawData,                         // 1.0 本体は逐語コピー（InstanceName は RawData に無い）
-                DataFields = src.DataFields,                   // 旧形式用（1.0 では null）
+                DataFields = src.DataFields?.DeepClone(saveGame.Header.BuildVersion),                   // 旧形式用（1.0 では null）
                 ParentObjectRoot = src.ParentObjectRoot,
                 ParentObjectName = src.ParentObjectName,
                 Components = src.Components != null

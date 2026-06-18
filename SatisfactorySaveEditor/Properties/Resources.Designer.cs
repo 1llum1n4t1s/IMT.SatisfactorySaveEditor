@@ -176,6 +176,8 @@ namespace SatisfactorySaveEditor.Properties
         public static string MsgSaveFailed_Body => ResourceManager.GetString("MsgSaveFailed_Body", resourceCulture);
         public static string MsgDuplicateRefUnsupported_Title => ResourceManager.GetString("MsgDuplicateRefUnsupported_Title", resourceCulture);
         public static string MsgDuplicateRefUnsupported_Body => ResourceManager.GetString("MsgDuplicateRefUnsupported_Body", resourceCulture);
+        public static string MsgDeleteRefUnsupported_Title => ResourceManager.GetString("MsgDeleteRefUnsupported_Title", resourceCulture);
+        public static string MsgDeleteRefUnsupported_Body => ResourceManager.GetString("MsgDeleteRefUnsupported_Body", resourceCulture);
         public static string MsgEditorName_Caption => ResourceManager.GetString("MsgEditorName_Caption", resourceCulture);
         public static string MsgAutoUpdateDisabled_Body => ResourceManager.GetString("MsgAutoUpdateDisabled_Body", resourceCulture);
         public static string PromptString_Title => ResourceManager.GetString("PromptString_Title", resourceCulture);

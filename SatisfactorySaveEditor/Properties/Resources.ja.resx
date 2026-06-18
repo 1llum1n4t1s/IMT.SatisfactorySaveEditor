@@ -453,6 +453,12 @@ Persistent_Level:PersistentLevel.Char_Player_C_0.inventory</value>
   <data name="MsgDuplicateRefUnsupported_Body" xml:space="preserve">
     <value>このオブジェクトはコンポーネント（インベントリ・接続など）を持っています。複製すると、コピーと原本が同じコンポーネントを共有し、ゲームロード時にセーブが破損します。参照を持つオブジェクトの複製はまだ対応していません。</value>
   </data>
+  <data name="MsgDeleteRefUnsupported_Title" xml:space="preserve">
+    <value>削除は未対応です</value>
+  </data>
+  <data name="MsgDeleteRefUnsupported_Body" xml:space="preserve">
+    <value>このオブジェクトはコンポーネント（インベントリ・接続など）をツリーの別の場所に持っています。このアクターだけ削除するとコンポーネントが孤立し、ゲームロード時にセーブが破損します。参照を持つオブジェクトの削除はまだ対応していません。</value>
+  </data>
   <data name="MsgEditorName_Caption" xml:space="preserve">
     <value>Satisfactory セーブ エディター</value>
   </data>

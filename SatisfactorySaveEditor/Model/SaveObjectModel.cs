@@ -216,7 +216,10 @@ namespace SatisfactorySaveEditor.Model
             // This is because the named only (pink) nodes aren't actually a valid object in the game
             if (Model == null) return;
 
-            Model.InstanceName = Title;
+            // raw V2（RawData 保持・DataFields==null）は InstanceName を含む内部参照が未パースのため、
+            // リネームすると保存時に RawData 内の参照と食い違う。プロパティ編集対応（Stage3）まで変更を抑止する。
+            if (Model.DataFields != null || Model.RawData == null)
+                Model.InstanceName = Title;
 
             // 1.0+ 新形式で内部データ未パース（DataFields==null）の場合はプロパティの反映をスキップする。
             // RawData がそのまま書き戻されるため round-trip は保たれる。

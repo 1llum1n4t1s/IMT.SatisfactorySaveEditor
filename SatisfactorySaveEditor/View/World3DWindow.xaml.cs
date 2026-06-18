@@ -88,10 +88,15 @@ namespace SatisfactorySaveEditor.View
         private PointGeometryModel3D highlight;
         private System.Windows.Point pointerDownPos;
         private bool pointerDownIsLeft;
+        // MainWindow.DataContext（= MainViewModel singleton）を生成時に1回だけ保持する。ダイアログ表示中に
+        // Application.Current.MainWindow が一時的に別 Window へ移っても null 化せず、削除/複製が無言で失敗しない。
+        private readonly MainViewModel mvm;
 
         public World3DWindow(IEnumerable<SaveObject> entries)
         {
             InitializeComponent();
+
+            mvm = Application.Current?.MainWindow?.DataContext as MainViewModel;
 
             try
             {
@@ -586,7 +591,6 @@ namespace SatisfactorySaveEditor.View
             var name = ent?.InstanceName;
             if (string.IsNullOrEmpty(name)) return;
 
-            var mvm = Application.Current?.MainWindow?.DataContext as MainViewModel;
             if (mvm == null) return;
 
             mvm.SelectByInstanceName(name);
@@ -658,7 +662,6 @@ namespace SatisfactorySaveEditor.View
             ClearHighlight();               // 2) ハイライト解除
             ClearDetails();                 //    詳細パネルも閉じる
 
-            var mvm = Application.Current?.MainWindow?.DataContext as MainViewModel;
             mvm?.DeleteByEntity(ent); // 3) identity ベースで削除（リネーム後も確実。Save 時に Entries へ反映）
 
             selectedCubeIndex = -1;
@@ -672,7 +675,6 @@ namespace SatisfactorySaveEditor.View
             var src = cubeEntities[selectedCubeIndex];
             if (src == null) return;
 
-            var mvm = Application.Current?.MainWindow?.DataContext as MainViewModel;
             if (mvm == null) return;
 
             var clone = mvm.DuplicateByInstanceName(src.InstanceName); // 1) Model+パーサで複製（+300cm X）
