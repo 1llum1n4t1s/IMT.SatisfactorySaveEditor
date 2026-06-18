@@ -659,7 +659,7 @@ namespace SatisfactorySaveEditor.View
             ClearDetails();                 //    詳細パネルも閉じる
 
             var mvm = Application.Current?.MainWindow?.DataContext as MainViewModel;
-            mvm?.DeleteByInstanceName(ent.InstanceName); // 3) Model+パーサ Entries から削除（保存に反映）
+            mvm?.DeleteByEntity(ent); // 3) identity ベースで削除（リネーム後も確実。Save 時に Entries へ反映）
 
             selectedCubeIndex = -1;
         }

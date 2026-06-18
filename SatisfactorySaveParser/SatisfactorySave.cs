@@ -217,7 +217,9 @@ namespace SatisfactorySaveParser
         {
             log.Info($"Writing save file: {file}");
 
-            FileName = Environment.ExpandEnvironmentVariables(file);
+            // FileName は直列化・書き込みが両方成功してから末尾で確定する。Save As 失敗時に失敗先パスへ
+            // 書き換えず、次回 Save / auto-backup が元のセーブを対象にし続けられるようにする。
+            var expandedFile = Environment.ExpandEnvironmentVariables(file);
 
             // 直列化（特に 1.0 の BodyV2.Serialize は未対応オブジェクトで例外を投げ得る）を先に
             // メモリ上で完了させてから出力先ファイルを開く。途中で失敗してもファイルをまだ
@@ -260,11 +262,14 @@ namespace SatisfactorySaveParser
 
                 // ここまで例外なく到達 = 直列化成功。出力先を truncate（FileMode.Create）して一括書き込みする。
                 fileBuffer.Position = 0;
-                using (var stream = new FileStream(FileName, FileMode.Create, FileAccess.Write))
+                using (var stream = new FileStream(expandedFile, FileMode.Create, FileAccess.Write))
                 {
                     fileBuffer.CopyTo(stream);
                 }
             }
+
+            // 直列化・書き込みが両方成功した。ここで初めて FileName を確定する。
+            FileName = expandedFile;
         }
 
         /// <summary>

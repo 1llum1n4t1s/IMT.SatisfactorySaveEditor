@@ -80,7 +80,10 @@ namespace SatisfactorySaveEditor.ViewModel
 
                 tokenSource.Cancel();
                 tokenSource = new CancellationTokenSource();
-                Task.Factory.StartNew(() => Filter(value), tokenSource.Token);
+                // 各検索タスクは自前の token を捕捉する。共有 tokenSource.Token を Filter 内で読むと
+                // 古いタスクが新タスクの未キャンセル token を見て古い結果を反映しうるため。
+                var filterToken = tokenSource.Token;
+                Task.Factory.StartNew(() => Filter(value, filterToken), filterToken);
             }
         }
 
@@ -112,12 +115,9 @@ namespace SatisfactorySaveEditor.ViewModel
         public MainViewModel()
         {
             string[] args = Environment.GetCommandLineArgs();
-            if (args.Length > 1 && File.Exists(args[1]))
-            {
-                // UI スレッドで同期 Wait するとロード内の await が UI コンテキストへ戻れずデッドロックするため fire-and-forget。
-                // 例外は LoadFileAsync 内で MessageBox + log 済みなので、握りつぶしにはならない。
-                _ = LoadFile(args[1]);
-            }
+            // 起動引数のセーブは全 command 初期化後（ctor 末尾）にロードする。ここで即 LoadFile すると
+            // LoadFileAsync が未初期化の SaveCommand 等を参照して失敗するため、パスだけ保持しておく。
+            var initialFile = args.Length > 1 && File.Exists(args[1]) ? args[1] : null;
 
             var savedFiles = Properties.Settings.Default.LastSaves?.Cast<string>().ToList();
             
@@ -185,6 +185,12 @@ namespace SatisfactorySaveEditor.ViewModel
             ResetSearchCommand = new RelayCommand(ResetSearch);
 
             CheckForUpdate(false).ConfigureAwait(false);
+
+            // 全 command 初期化後に起動引数のセーブをロードする（fire-and-forget、例外は LoadFileAsync 内で処理済み）。
+            if (initialFile != null)
+            {
+                _ = LoadFile(initialFile);
+            }
         }
 
         private void OpenPreferences()
@@ -619,6 +625,34 @@ namespace SatisfactorySaveEditor.ViewModel
             return true;
         }
 
+        /// <summary>SaveObject 実体（identity）から対応する Model ノードを再帰探索する。Title（リネームで変わる）でなく
+        /// 参照一致で引くため、プロパティペインでのリネーム後に InstanceName が旧のままでも正しく一致する。</summary>
+        private static SaveObjectModel FindNodeByModel(SaveObjectModel root, SatisfactorySaveParser.SaveObject target)
+        {
+            if (root == null) return null;
+            if (ReferenceEquals(root.Model, target)) return root;
+            foreach (var child in root.Items)
+            {
+                var found = FindNodeByModel(child, target);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>SaveObject 実体（identity）で削除する。3D ビューは SaveEntity 参照を保持するため、リネーム未適用
+        /// （Title 変更済み・InstanceName 旧のまま）でも確実にツリーから prune できる。</summary>
+        public bool DeleteByEntity(SatisfactorySaveParser.SaveObject target)
+        {
+            if (target == null || rootItem == null) return false;
+            var m = FindNodeByModel(rootItem, target);
+            if (m == null || m == rootItem) return false;
+            rootItem.Remove(m);
+            if (SelectedItem == m) SelectedItem = null;
+            OnPropertyChanged(nameof(RootItem));
+            HasUnsavedChanges = true;
+            return true;
+        }
+
         /// <summary>
         /// 3D ビュー等の外部から、インスタンス名でオブジェクトを複製する。新しい一意 InstanceName を採番し、
         /// 1.0 本体（RawData）は逐語コピーするので byte-exact round-trip。Position は +offsetXcm ずらす。
@@ -632,11 +666,12 @@ namespace SatisfactorySaveEditor.ViewModel
             var src = saveGame.Entries.OfType<SaveEntity>().FirstOrDefault(e => e.InstanceName == instanceName);
             if (src == null) return null;
 
-            // P0 止血: コンポーネント（インベントリ・接続等）を持つアクターを複製すると、クローンの Components と
-            // RawData 内の ObjectReference が原本と同じ PathName を指したままになり、ゲームロードで原本とクローンが
-            // 同一コンポーネントを共有して破損する。旧 ID→新 ID の参照書き換えは Stage3 の V2 ライターに依存するため、
-            // それまでは参照を持つオブジェクトの複製を拒否して通知する（黙って壊れたクローンを作らない）。
-            if (src.Components != null && src.Components.Count > 0)
+            // P0 止血: 参照を持つアクターを複製するとクローンと原本が同一コンポーネント／親を共有してゲームロードで破損する。
+            // 1.0+ の raw アクターは Components が未展開なので、RawData 先頭の data プレフィックス＋プロパティを読んで
+            // 参照の有無を判定する（SaveEntity.HasOutgoingReferences。電線等は "None" 整合確認＋ObjectProperty 検出の
+            // 二重防御で検出）。参照なし（Foundation 等）は複製を許可し、参照あり（コンポーネント／親／プロパティ参照）は
+            // 拒否して通知する。旧 ID→新 ID の参照書き換えは Stage3 の V2 ライターに依存（それまで複製は参照なしに限定）。
+            if (src.HasOutgoingReferences())
             {
                 MessageBox.Show(Resources.MsgDuplicateRefUnsupported_Body, Resources.MsgDuplicateRefUnsupported_Title,
                     MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -655,7 +690,9 @@ namespace SatisfactorySaveEditor.ViewModel
                 DataFields = src.DataFields,                   // 旧形式用（1.0 では null）
                 ParentObjectRoot = src.ParentObjectRoot,
                 ParentObjectName = src.ParentObjectName,
-                Components = new System.Collections.Generic.List<SatisfactorySaveParser.Structures.ObjectReference>(src.Components),
+                Components = src.Components != null
+                    ? new System.Collections.Generic.List<SatisfactorySaveParser.Structures.ObjectReference>(src.Components)
+                    : new System.Collections.Generic.List<SatisfactorySaveParser.Structures.ObjectReference>(),
             };
 
             // Vector はクラス＝共有回避のため必ず new する（共有すると原本も動く）。未設定（null）なら複製側も未設定のまま。
@@ -885,7 +922,7 @@ namespace SatisfactorySaveEditor.ViewModel
             }
         }
 
-        private void Filter(string value)
+        private void Filter(string value, CancellationToken cancellationToken)
         {
             if (rootItem == null) return;
 
@@ -905,7 +942,7 @@ namespace SatisfactorySaveEditor.ViewModel
                     // 背景スレッドで列挙を完了させてから（UI を塞がない）、UI スレッドへは確定済みリストだけ渡す。
                     // Dispatcher 内での遅延列挙中に 3D 操作でツリーが変わって並行例外になる窓を無くす。
                     var filtered = rootItem.DescendantSelfViewModelLazy
-                        .WithCancellation(tokenSource.Token)
+                        .WithCancellation(cancellationToken)
                         .Where(vm => vm.MatchesFilter(valueLower))
                         .ToList();
                     Application.Current.Dispatcher.Invoke(() =>
