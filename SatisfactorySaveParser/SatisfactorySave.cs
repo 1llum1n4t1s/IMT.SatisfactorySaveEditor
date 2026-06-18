@@ -104,6 +104,7 @@ namespace SatisfactorySaveParser
             while (stream.Position < stream.Length)
             {
                 long compressedSize;
+                long uncompressedSize;
 
                 if (isNewFormat)
                 {
@@ -118,7 +119,7 @@ namespace SatisfactorySaveParser
                     if (compressorAlgo != ChunkInfo.CompressorZlib)
                         throw new InvalidDataException($"Unsupported chunk compressor algorithm {compressorAlgo} (expected {ChunkInfo.CompressorZlib} = zlib)");
                     compressedSize = reader.ReadInt64();
-                    reader.ReadInt64();   // uncompressedSize
+                    uncompressedSize = reader.ReadInt64();   // uncompressedSize
                     reader.ReadInt64();   // compressedSize (繰り返し)
                     reader.ReadInt64();   // uncompressedSize (繰り返し)
                 }
@@ -134,6 +135,7 @@ namespace SatisfactorySaveParser
 
                     var subChunk = reader.ReadChunkInfo();
                     compressedSize = subChunk.CompressedSize;
+                    uncompressedSize = subChunk.UncompressedSize;
                 }
 
                 // 破損/悪意あるファイルでの無限ループ・解凍爆弾を防ぐ: compressedSize は信頼境界外の値なので
@@ -141,16 +143,38 @@ namespace SatisfactorySaveParser
                 // 部分ストリームに対して展開すると ZLibStream の先読み越境も無くなり、入力位置の手動補正も不要になる。
                 if (compressedSize <= 0 || stream.Position + compressedSize > stream.Length)
                     throw new InvalidDataException($"不正な圧縮チャンク長 {compressedSize}（残り {stream.Length - stream.Position} バイト）");
+                // uncompressedSize も信頼境界外。解凍爆弾（小さな圧縮データが巨大展開）を防ぐため、宣言サイズが
+                // 妥当範囲（0 < size <= ChunkSize）であることを検証し、その byte 数ちょうどに展開を制限する。
+                if (uncompressedSize <= 0 || uncompressedSize > ChunkInfo.ChunkSize)
+                    throw new InvalidDataException($"不正な展開後チャンク長 {uncompressedSize}（上限 {ChunkInfo.ChunkSize}）");
 
                 var compressedChunk = reader.ReadBytes((int)compressedSize);
                 using (var chunkStream = new MemoryStream(compressedChunk, writable: false))
                 using (var zStream = new ZLibStream(chunkStream, CompressionMode.Decompress))
                 {
-                    zStream.CopyTo(buffer);
+                    CopyExactly(zStream, buffer, (int)uncompressedSize);
                 }
             }
 
             return buffer;
+        }
+
+        /// <summary>source から正確に expected バイトを dest へコピーする。解凍ストリームが宣言サイズより
+        /// 少ない／多いデータを出した場合は破損・解凍爆弾とみなして例外を投げる（信頼境界外データの防御）。</summary>
+        private static void CopyExactly(Stream source, Stream dest, int expected)
+        {
+            var temp = new byte[Math.Min(expected, 81920)];
+            int remaining = expected;
+            while (remaining > 0)
+            {
+                int read = source.Read(temp, 0, Math.Min(temp.Length, remaining));
+                if (read == 0)
+                    throw new InvalidDataException("解凍データが宣言サイズに達しませんでした（破損ファイル）");
+                dest.Write(temp, 0, read);
+                remaining -= read;
+            }
+            if (source.ReadByte() != -1)
+                throw new InvalidDataException("解凍データが宣言サイズを超過しました（破損または解凍爆弾）");
         }
 
         private void LoadData(BinaryReader reader)

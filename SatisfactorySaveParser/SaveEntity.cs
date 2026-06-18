@@ -107,12 +107,12 @@ namespace SatisfactorySaveParser
             }
         }
 
-        /// <summary>型名ツリー（FPropertyTypeName）を再帰走査し ObjectProperty を含むか判定する。
+        /// <summary>型名ツリー（FPropertyTypeName）を再帰走査し ObjectProperty / InterfaceProperty を含むか判定する。
         /// ArrayProperty&lt;ObjectProperty&gt; 等のネストした参照（電線の両端ポール参照など）も拾う。</summary>
         private static bool TagTreeHasObjectProperty(PropertyTypes.V2.FPropertyTagNodeV2 node)
         {
             if (node == null) return false;
-            if (node.Name == "ObjectProperty") return true;
+            if (node.Name == "ObjectProperty" || node.Name == "InterfaceProperty") return true;
             foreach (var c in node.Children)
                 if (TagTreeHasObjectProperty(c)) return true;
             return false;

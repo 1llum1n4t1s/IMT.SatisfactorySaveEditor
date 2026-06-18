@@ -313,6 +313,42 @@ namespace SatisfactorySaveEditor.ViewModel
             return false;
         }
 
+        /// <summary>raw V2（1.0 未パース）アクターが、他オブジェクトの不透明 RawData から参照されているか。
+        /// 参照は ObjectProperty/InterfaceProperty の PathName に対象 InstanceName が length-prefixed FString として
+        /// 入るため、RawData バイト列から InstanceName の UTF-8 表現を検索する（保守的近似：ヒットすれば inbound あり）。
+        /// これを見ないと、参照される側を削除したとき残りの RawData が存在しない instance を指して孤児化する。</summary>
+        private bool HasIncomingRawV2Reference(SatisfactorySaveParser.SaveObject target)
+        {
+            if (!(target is SatisfactorySaveParser.SaveEntity) || target.DataFields != null || target.RawData == null)
+                return false;
+            if (saveGame?.Entries == null || string.IsNullOrEmpty(target.InstanceName))
+                return false;
+
+            var needle = System.Text.Encoding.UTF8.GetBytes(target.InstanceName);
+            if (needle.Length == 0) return false;
+            foreach (var obj in saveGame.Entries)
+            {
+                if (ReferenceEquals(obj, target)) continue;
+                if (ContainsSequence(obj.RawData, needle)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>haystack バイト列に needle が連続部分列として含まれるか（素朴な線形探索）。</summary>
+        private static bool ContainsSequence(byte[] haystack, byte[] needle)
+        {
+            if (haystack == null || needle == null || needle.Length == 0 || haystack.Length < needle.Length)
+                return false;
+            int last = haystack.Length - needle.Length;
+            for (int i = 0; i <= last; i++)
+            {
+                int j = 0;
+                while (j < needle.Length && haystack[i + j] == needle[j]) j++;
+                if (j == needle.Length) return true;
+            }
+            return false;
+        }
+
         /// <summary>ノードとその全子孫に、raw V2 で削除拒否すべきオブジェクトが 1 つでも含まれるか（フォルダ削除ガード用）。</summary>
         private bool SubtreeHasUndeletable(SaveObjectModel node)
         {
@@ -688,7 +724,7 @@ namespace SatisfactorySaveEditor.ViewModel
             // 存在しないアクターを指す OuterPathName で書き戻され孤児化する。完全な参照 prune は Stage3 まで未対応
             // なので、参照を持つアクターの削除は拒否する（複製ガードと対称）。
             // raw V2（1.0 未パース）で削除すると round-trip 参照が孤児化するオブジェクトは拒否（複製ガードと対称）。
-            if (IsUndeletableRawV2(target))
+            if (IsUndeletableRawV2(target) || HasIncomingRawV2Reference(target))
             {
                 MessageBox.Show(Resources.MsgDeleteRefUnsupported_Body, Resources.MsgDeleteRefUnsupported_Title,
                     MessageBoxButton.OK, MessageBoxImage.Warning);
