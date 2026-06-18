@@ -32,6 +32,7 @@ namespace SatisfactorySaveEditor.ViewModel
         private SaveObjectModel rootItem;
         private SaveObjectModel selectedItem;
         private string searchText;
+        private World3DWindow open3DWindow; // 開いている 3D ビュー（多重生成防止用。閉じたら null に戻す）
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         private ObservableCollection<SaveObjectModel> rootItems = new ObservableCollection<SaveObjectModel>();
         private static readonly ILog log = LogManager.GetCurrentClassLogger();
@@ -113,8 +114,9 @@ namespace SatisfactorySaveEditor.ViewModel
             string[] args = Environment.GetCommandLineArgs();
             if (args.Length > 1 && File.Exists(args[1]))
             {
-                var task = LoadFile(args[1]);
-                task.Wait();
+                // UI スレッドで同期 Wait するとロード内の await が UI コンテキストへ戻れずデッドロックするため fire-and-forget。
+                // 例外は LoadFileAsync 内で MessageBox + log 済みなので、握りつぶしにはならない。
+                _ = LoadFile(args[1]);
             }
 
             var savedFiles = Properties.Settings.Default.LastSaves?.Cast<string>().ToList();
@@ -200,6 +202,14 @@ namespace SatisfactorySaveEditor.ViewModel
         /// </summary>
         private void Open3DView()
         {
+            // 既に 3D ビューが開いていれば多重生成せず最前面化する。
+            // 連打で DX11 デバイス + 頂点バッファが個数分リークするのを防ぐ。
+            if (open3DWindow != null)
+            {
+                open3DWindow.Activate();
+                return;
+            }
+
             if (saveGame?.Entries == null || rootItem == null)
             {
                 MessageBox.Show(Resources.Msg3DNoSave_Body, Resources.Menu3DView, MessageBoxButton.OK, MessageBoxImage.Information);
@@ -220,6 +230,8 @@ namespace SatisfactorySaveEditor.ViewModel
             {
                 Owner = Application.Current.MainWindow
             };
+            open3DWindow = window;
+            window.Closed += (s, e) => open3DWindow = null;
             window.Show();
         }
 
@@ -321,6 +333,7 @@ namespace SatisfactorySaveEditor.ViewModel
         /// <param name="saveAs">(optional) If the Save As... option box should be brought up to choose a destination</param>
         private async Task Save(bool saveAs)
         {
+            string targetFile = null;
             if (saveAs)
             {
                 SaveFileDialog dialog = new SaveFileDialog
@@ -332,24 +345,11 @@ namespace SatisfactorySaveEditor.ViewModel
                     AddExtension = true
                 };
 
-                if (dialog.ShowDialog() == true)
-                {
-                    await AutoBackupIfEnabled();
-
-                    var newObjects = rootItem.DescendantSelf;
-                    saveGame.Entries = saveGame.Entries.Intersect(newObjects).ToList();
-                    saveGame.Entries.AddRange(newObjects.Except(saveGame.Entries));
-
-                    rootItem.ApplyChanges();
-                    this.IsBusy = true;
-                    await Task.Run(() => saveGame.Save(dialog.FileName));
-                    this.IsBusy = false;
-                    HasUnsavedChanges = false;
-                    OnPropertyChanged(nameof(FileName));
-                    AddRecentFileEntry(dialog.FileName);
-                }
+                if (dialog.ShowDialog() != true) return;
+                targetFile = dialog.FileName;
             }
-            else
+
+            try
             {
                 await AutoBackupIfEnabled();
 
@@ -359,9 +359,29 @@ namespace SatisfactorySaveEditor.ViewModel
 
                 rootItem.ApplyChanges();
                 this.IsBusy = true;
-                await Task.Run(() => saveGame.Save());
-                this.IsBusy = false;
+                if (targetFile != null)
+                    await Task.Run(() => saveGame.Save(targetFile));
+                else
+                    await Task.Run(() => saveGame.Save());
+
                 HasUnsavedChanges = false;
+                if (targetFile != null)
+                {
+                    OnPropertyChanged(nameof(FileName));
+                    AddRecentFileEntry(targetFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                // 保存失敗を握りつぶすとユーザーは編集が永続化されたと誤認する。明示的に通知する。
+                // SatisfactorySave.Save は memory-first（完全シリアライズ後に書き出し）なので、
+                // ここで例外が出ても元ファイルは無傷のまま残る。
+                log.Error(ex);
+                MessageBox.Show(string.Format(Resources.MsgSaveFailed_Body, ex.Message), Resources.MsgSaveFailed_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                this.IsBusy = false;
             }
         }
 
@@ -408,9 +428,17 @@ namespace SatisfactorySaveEditor.ViewModel
             }
             finally
             {
-                //delete the temporary folder and copy even if the zipping process fails
-                File.Delete(tempFilePath);
-                Directory.Delete(pathToZipFrom);
+                // 圧縮が失敗してもテンポラリを片付ける。ただし片付けの二次例外が catch で throw した真の例外を
+                // 覆い隠さないよう、削除自体を保護する。非再帰 Delete は中身が残ると例外になるため recursive で一括削除。
+                try
+                {
+                    if (Directory.Exists(pathToZipFrom))
+                        Directory.Delete(pathToZipFrom, true);
+                }
+                catch (Exception cleanupEx)
+                {
+                    log.Error(cleanupEx); // クリーンアップ失敗は副次的。本来の例外を優先するためログのみに留める
+                }
             }
 
             if (manual)
@@ -604,6 +632,17 @@ namespace SatisfactorySaveEditor.ViewModel
             var src = saveGame.Entries.OfType<SaveEntity>().FirstOrDefault(e => e.InstanceName == instanceName);
             if (src == null) return null;
 
+            // P0 止血: コンポーネント（インベントリ・接続等）を持つアクターを複製すると、クローンの Components と
+            // RawData 内の ObjectReference が原本と同じ PathName を指したままになり、ゲームロードで原本とクローンが
+            // 同一コンポーネントを共有して破損する。旧 ID→新 ID の参照書き換えは Stage3 の V2 ライターに依存するため、
+            // それまでは参照を持つオブジェクトの複製を拒否して通知する（黙って壊れたクローンを作らない）。
+            if (src.Components != null && src.Components.Count > 0)
+            {
+                MessageBox.Show(Resources.MsgDuplicateRefUnsupported_Body, Resources.MsgDuplicateRefUnsupported_Title,
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return null;
+            }
+
             var clone = new SaveEntity(src.TypePath, src.RootObject, MakeUniqueInstanceName(src.InstanceName))
             {
                 ObjectFlags = src.ObjectFlags,
@@ -769,12 +808,6 @@ namespace SatisfactorySaveEditor.ViewModel
 
             BuildNode(rootItem.Items, saveTree);
 
-            // [diag] ツリー構築結果の確認用（原因特定後に除去）。
-            log.Debug($"[diag] Tree built: entries={saveGame.Entries.Count}, " +
-                      $"entities={saveGame.Entries.OfType<SaveEntity>().Count()}, " +
-                      $"components={saveGame.Entries.OfType<SaveComponent>().Count()}, " +
-                      $"topLevelNodes={rootItem.Items.Count}");
-
             rootItem.IsExpanded = true;
             foreach (var item in rootItem.Items)
             {
@@ -867,11 +900,27 @@ namespace SatisfactorySaveEditor.ViewModel
             else
             {
                 var valueLower = value.ToLower(CultureInfo.InvariantCulture);
-                var filter = rootItem.DescendantSelfViewModel.WithCancellation(tokenSource.Token).Where(vm => vm.MatchesFilter(valueLower));
-                Application.Current.Dispatcher.Invoke(() =>
+                try
                 {
-                    RootItem = new ObservableCollection<SaveObjectModel>(filter);
-                });
+                    // 背景スレッドで列挙を完了させてから（UI を塞がない）、UI スレッドへは確定済みリストだけ渡す。
+                    // Dispatcher 内での遅延列挙中に 3D 操作でツリーが変わって並行例外になる窓を無くす。
+                    var filtered = rootItem.DescendantSelfViewModelLazy
+                        .WithCancellation(tokenSource.Token)
+                        .Where(vm => vm.MatchesFilter(valueLower))
+                        .ToList();
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        RootItem = new ObservableCollection<SaveObjectModel>(filtered);
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    // 新しい検索語に置き換わった（tokenSource.Cancel）。古い列挙は破棄してよい。
+                }
+                catch (InvalidOperationException)
+                {
+                    // 列挙中に 3D 操作等でツリーが変更された。次の打鍵で再評価されるため無視する。
+                }
             }
         }
 

@@ -18,8 +18,8 @@ namespace SourceCodeMessage.ViewModel
 
         private void OpenReleases(Window obj)
         {
-            //Robb, Goz3rr, and virusek20 have the login info for this bit.ly account if needed
-            Process.Start(new ProcessStartInfo("http://bit.ly/SSE_Wrong_Download") { UseShellExecute = true });
+            // 平文 HTTP + 短縮 URL（bit.ly）を避け、公式リポジトリの Releases ページへ https 直リンクする。
+            Process.Start(new ProcessStartInfo("https://github.com/Goz3rr/SatisfactorySaveEditor/releases") { UseShellExecute = true });
             Application.Current.Shutdown();
         }
 

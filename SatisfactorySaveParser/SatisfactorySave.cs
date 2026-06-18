@@ -108,7 +108,8 @@ namespace SatisfactorySaveParser
                 if (isNewFormat)
                 {
                     var magic = reader.ReadInt32();
-                    Trace.Assert(magic == unchecked((int)ChunkInfo.Magic));
+                    if (magic != unchecked((int)ChunkInfo.Magic))
+                        throw new InvalidDataException($"不正なチャンク magic 0x{magic:X8}（期待 0x{ChunkInfo.Magic:X8}）");
                     var marker = reader.ReadInt32();   // marker 0x22222222
                     if (marker != ChunkInfo.NewFormatMarker)
                         throw new InvalidDataException($"Unexpected chunk marker 0x{marker:X8} (expected 0x{ChunkInfo.NewFormatMarker:X8})");
@@ -124,8 +125,10 @@ namespace SatisfactorySaveParser
                 else
                 {
                     var header = reader.ReadChunkInfo();
-                    Trace.Assert(header.CompressedSize == ChunkInfo.Magic);
-                    Trace.Assert(header.UncompressedSize == ChunkInfo.ChunkSize);
+                    if (header.CompressedSize != ChunkInfo.Magic)
+                        throw new InvalidDataException($"不正な旧形式チャンク magic 0x{header.CompressedSize:X}");
+                    if (header.UncompressedSize != ChunkInfo.ChunkSize)
+                        throw new InvalidDataException($"不正な旧形式チャンクサイズ {header.UncompressedSize}");
 
                     reader.ReadChunkInfo(); // summary
 
@@ -133,14 +136,18 @@ namespace SatisfactorySaveParser
                     compressedSize = subChunk.CompressedSize;
                 }
 
-                var startPosition = stream.Position;
-                using (var zStream = new ZLibStream(stream, CompressionMode.Decompress, leaveOpen: true))
+                // 破損/悪意あるファイルでの無限ループ・解凍爆弾を防ぐ: compressedSize は信頼境界外の値なので
+                // 正値かつ残ストリーム内であることを検証してから、その長さ分だけ切り出して展開する。
+                // 部分ストリームに対して展開すると ZLibStream の先読み越境も無くなり、入力位置の手動補正も不要になる。
+                if (compressedSize <= 0 || stream.Position + compressedSize > stream.Length)
+                    throw new InvalidDataException($"不正な圧縮チャンク長 {compressedSize}（残り {stream.Length - stream.Position} バイト）");
+
+                var compressedChunk = reader.ReadBytes((int)compressedSize);
+                using (var chunkStream = new MemoryStream(compressedChunk, writable: false))
+                using (var zStream = new ZLibStream(chunkStream, CompressionMode.Decompress))
                 {
                     zStream.CopyTo(buffer);
                 }
-
-                // ZLibStream はバッファリングのため使用バイト数より多く読むので、入力位置を手動で補正する
-                stream.Position = startPosition + compressedSize;
             }
 
             return buffer;
@@ -171,8 +178,10 @@ namespace SatisfactorySaveParser
 
             var totalSaveObjectData = reader.ReadInt32();
             log.Info($"Save contains {totalSaveObjectData} object data");
-            Trace.Assert(Entries.Count == totalSaveObjects);
-            Trace.Assert(Entries.Count == totalSaveObjectData);
+            if (Entries.Count != totalSaveObjects)
+                throw new InvalidDataException($"オブジェクトヘッダー数の不一致: {Entries.Count} != {totalSaveObjects}");
+            if (Entries.Count != totalSaveObjectData)
+                throw new InvalidDataException($"オブジェクトデータ数の不一致: {Entries.Count} != {totalSaveObjectData}");
 
             for (int i = 0; i < Entries.Count; i++)
             {
@@ -271,9 +280,9 @@ namespace SatisfactorySaveParser
 
                     using (var zStream = new ZLibStream(zBuffer, CompressionLevel.Optimal, leaveOpen: true))
                     {
-                        var tmpBuf = new byte[remaining];
-                        buffer.Read(tmpBuf, 0, remaining);
-                        zStream.Write(tmpBuf, 0, remaining);
+                        // buffer は呼び出し側で new MemoryStream() 確定なので GetBuffer() で内部配列を直接渡し、
+                        // チャンク毎の tmpBuf 確保（128KiB × チャンク数）を避ける。
+                        zStream.Write(buffer.GetBuffer(), ChunkInfo.ChunkSize * i, remaining);
                     }
 
                     if (isNewFormat)
@@ -286,7 +295,7 @@ namespace SatisfactorySaveParser
                         writer.Write((long)remaining);                  // uncompressedSize
                         writer.Write(zBuffer.Length);                   // compressedSize (繰り返し)
                         writer.Write((long)remaining);                  // uncompressedSize (繰り返し)
-                        writer.Write(zBuffer.ToArray());
+                        writer.Write(zBuffer.GetBuffer(), 0, (int)zBuffer.Length);
                     }
                     else
                     {
@@ -308,7 +317,7 @@ namespace SatisfactorySaveParser
                             UncompressedSize = remaining
                         });
 
-                        writer.Write(zBuffer.ToArray());
+                        writer.Write(zBuffer.GetBuffer(), 0, (int)zBuffer.Length);
                     }
                 }
             }

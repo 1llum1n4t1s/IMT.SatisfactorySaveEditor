@@ -64,6 +64,22 @@ namespace SatisfactorySaveEditor.Model
             }
         }
 
+        /// <summary>
+        ///     DescendantSelfViewModel の遅延列挙版。検索フィルタが WithCancellation で
+        ///     キャンセルされたとき、フル List をマテリアライズせず途中で列挙を打ち切れる。
+        ///     列挙中にツリー構造を変更しないこと（変更を伴うチートは List 版 DescendantSelfViewModel を使う）。
+        /// </summary>
+        public IEnumerable<SaveObjectModel> DescendantSelfViewModelLazy
+        {
+            get
+            {
+                if (Model != null) yield return this;
+                foreach (var item in Items)
+                    foreach (var descendant in item.DescendantSelfViewModelLazy)
+                        yield return descendant;
+            }
+        }
+
         public string Title
         {
             get => title;

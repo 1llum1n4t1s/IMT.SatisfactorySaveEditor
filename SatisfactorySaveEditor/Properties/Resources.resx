@@ -438,6 +438,21 @@ If this issue persists, please report it via "Help &gt; Report an Issue", and at
   <data name="MsgErrorOpeningFile_Title" xml:space="preserve">
     <value>Error opening file</value>
   </data>
+  <data name="MsgSaveFailed_Title" xml:space="preserve">
+    <value>Save failed</value>
+  </data>
+  <data name="MsgSaveFailed_Body" xml:space="preserve">
+    <value>The save file could not be written:
+{0}
+
+Your original file is unchanged. Check the logs for more details.</value>
+  </data>
+  <data name="MsgDuplicateRefUnsupported_Title" xml:space="preserve">
+    <value>Duplicate not supported</value>
+  </data>
+  <data name="MsgDuplicateRefUnsupported_Body" xml:space="preserve">
+    <value>This object has components (inventory, connections, etc.). Duplicating it would make the copy and the original share the same components and corrupt the save on load. Duplicating objects that hold references is not supported yet.</value>
+  </data>
   <data name="MsgEditorName_Caption" xml:space="preserve">
     <value>Satisfactory Save Editor</value>
   </data>

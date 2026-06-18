@@ -438,6 +438,21 @@ Persistent_Level:PersistentLevel.Char_Player_C_0.inventory</value>
   <data name="MsgErrorOpeningFile_Title" xml:space="preserve">
     <value>ファイルを開けませんでした</value>
   </data>
+  <data name="MsgSaveFailed_Title" xml:space="preserve">
+    <value>保存に失敗しました</value>
+  </data>
+  <data name="MsgSaveFailed_Body" xml:space="preserve">
+    <value>セーブファイルを書き込めませんでした:
+{0}
+
+元のファイルは変更されていません。詳細はログを確認してください。</value>
+  </data>
+  <data name="MsgDuplicateRefUnsupported_Title" xml:space="preserve">
+    <value>複製は未対応です</value>
+  </data>
+  <data name="MsgDuplicateRefUnsupported_Body" xml:space="preserve">
+    <value>このオブジェクトはコンポーネント（インベントリ・接続など）を持っています。複製すると、コピーと原本が同じコンポーネントを共有し、ゲームロード時にセーブが破損します。参照を持つオブジェクトの複製はまだ対応していません。</value>
+  </data>
   <data name="MsgEditorName_Caption" xml:space="preserve">
     <value>Satisfactory セーブ エディター</value>
   </data>

@@ -37,49 +37,6 @@ namespace SatisfactorySaveEditor.Cheats
             return currentId;
         }
 
-        public static byte[] PrepareForParse(string itemPath, int itemAmount)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                using (BinaryWriter writer = new BinaryWriter(ms))
-                {
-                    writer.WriteLengthPrefixedString("mInventoryStacks");
-                    writer.WriteLengthPrefixedString("StructProperty");
-                    writer.Write("Item".GetSerializedLength() + "StructProperty".GetSerializedLength() + 4 + 4 + "InventoryItem".GetSerializedLength() + 4 + 4 + 4 + 4 + 1 + 4 + itemPath.GetSerializedLength() + "".GetSerializedLength() + "".GetSerializedLength() + "NumItems".GetSerializedLength() + "IntProperty".GetSerializedLength() + 4 + 4 + 1 + 4 + "None".GetSerializedLength()); // TODO
-                    writer.Write(0);
-                    writer.WriteLengthPrefixedString("InventoryStack");
-                    writer.Write(0);
-                    writer.Write(0);
-                    writer.Write(0);
-                    writer.Write(0);
-                    writer.Write((byte)0);
-                    writer.WriteLengthPrefixedString("Item");
-                    writer.WriteLengthPrefixedString("StructProperty");
-                    writer.Write(4 + itemPath.GetSerializedLength() + "".GetSerializedLength() + "".GetSerializedLength());
-                    writer.Write(0);
-                    writer.WriteLengthPrefixedString("InventoryItem"); // ItemType
-                    writer.Write(0);
-                    writer.Write(0);
-                    writer.Write(0);
-                    writer.Write(0);
-                    writer.Write((byte)0);
-                    writer.Write(0); // Unknown1
-                    writer.WriteLengthPrefixedString(itemPath); // ItemType
-                    writer.WriteLengthPrefixedString(""); // Unknown2
-                    writer.WriteLengthPrefixedString(""); // Unknown3
-                    writer.WriteLengthPrefixedString("NumItems");
-                    writer.WriteLengthPrefixedString("IntProperty");
-                    writer.Write(4); // Length
-                    writer.Write(0); // Index
-                    writer.Write((byte)0);
-                    writer.Write(itemAmount); // Value
-                    writer.WriteLengthPrefixedString("None");
-
-                }
-                return ms.ToArray();
-            }
-        }
-
         public bool AddDoggo(SaveObjectModel rootItem, SatisfactorySave saveGame)
         {
             currentDoggoID = GetNextDoggoID(currentDoggoID, rootItem);
@@ -97,7 +54,7 @@ namespace SatisfactorySaveEditor.Cheats
                 DataFields = new SerializedFields(),
                 ParentEntityName = $"Persistent_Level:PersistentLevel.Char_SpaceRabbit_C_{currentDoggoID}"
             };
-            byte[] bytes = PrepareForParse("", 0);
+            byte[] bytes = MassDismantleCheat.PrepareForParse("", 0); // 同一実装を MassDismantleCheat に集約（EverythingBox と共有）
             SaveComponent inventoryComponent;
             using (BinaryReader reader = new BinaryReader(new MemoryStream(bytes)))
             {

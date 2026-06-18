@@ -168,7 +168,26 @@ namespace SatisfactorySaveEditor.View
             // 素の W/A/S/D は横取りしないので viewport の WASD 移動はそのまま効く。
             PreviewKeyDown += OnWindowKeyDown;
 
-            Closed += (s, e) => effects.Dispose();
+            Closed += OnWindowClosed;
+        }
+
+        // ウィンドウクローズ時に HelixToolkit の GPU リソースを明示解放する。これを怠ると
+        // DX11 デバイス・頂点/インデックスバッファがプロセス終了までリークする（特に多重開閉時）。
+        private void OnWindowClosed(object sender, EventArgs e)
+        {
+            PreviewKeyDown -= OnWindowKeyDown;
+            if (viewport != null)
+            {
+                viewport.PreviewMouseLeftButtonDown -= OnViewportLeftDown;
+                viewport.PreviewMouseLeftButtonUp -= OnViewportLeftUp;
+                viewport.PreviewMouseWheel -= OnViewportWheel;
+
+                // 各 Element3D（boxModel / ハイライト / 接続ライン / 地面・グリッド・ライト）は GPU バッファを抱える IDisposable。
+                foreach (var disposable in viewport.Items.OfType<IDisposable>().ToList())
+                    disposable.Dispose();
+                viewport.Items.Clear();
+            }
+            effects.Dispose();
         }
 
         private static int CategoryOf(string seg)
