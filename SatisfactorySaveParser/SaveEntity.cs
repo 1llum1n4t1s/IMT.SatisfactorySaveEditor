@@ -63,7 +63,9 @@ namespace SatisfactorySaveParser
         public bool HasOutgoingReferences()
         {
             if (RawData == null)
-                return !string.IsNullOrEmpty(ParentObjectName) || (Components != null && Components.Count > 0);
+                return !string.IsNullOrEmpty(ParentObjectName)
+                    || (Components != null && Components.Count > 0)
+                    || FieldsContainObjectReference(DataFields); // パース済みフィールド内の他オブジェクト参照（ObjectProperty / InterfaceProperty 等）
 
             try
             {
@@ -114,6 +116,40 @@ namespace SatisfactorySaveParser
             foreach (var c in node.Children)
                 if (TagTreeHasObjectProperty(c)) return true;
             return false;
+        }
+
+        /// <summary>レガシー（パース済み DataFields）のプロパティ列を再帰走査し、他オブジェクトへの参照
+        /// （ObjectProperty / InterfaceProperty、それらの Array/Set、ネスト Struct 内）を含むか判定する。
+        /// 複製時にクローンが原本のターゲットを指したまま共有されるのを防ぐためのガード（V2 の TagTreeHasObjectProperty と対称）。
+        /// MapProperty は未パース byte[] のため対象外（現状は ObjectProperty 系のみ検出）。</summary>
+        private static bool FieldsContainObjectReference(System.Collections.Generic.IEnumerable<PropertyTypes.SerializedProperty> fields)
+        {
+            if (fields == null) return false;
+            foreach (var prop in fields)
+                if (PropertyHasObjectReference(prop)) return true;
+            return false;
+        }
+
+        private static bool PropertyHasObjectReference(PropertyTypes.SerializedProperty prop)
+        {
+            switch (prop)
+            {
+                case PropertyTypes.ObjectProperty _:
+                case PropertyTypes.InterfaceProperty _:
+                    return true;
+                case PropertyTypes.ArrayProperty arr:
+                    if (arr.Type == PropertyTypes.ObjectProperty.TypeName || arr.Type == PropertyTypes.InterfaceProperty.TypeName)
+                        return true;
+                    return FieldsContainObjectReference(arr.Elements); // StructProperty 配列等の要素を再帰
+                case PropertyTypes.SetProperty setProp:
+                    if (setProp.Type == PropertyTypes.ObjectProperty.TypeName)
+                        return true;
+                    return FieldsContainObjectReference(setProp.Elements);
+                case PropertyTypes.StructProperty st:
+                    return st.Data is PropertyTypes.Structs.DynamicStructData dyn && FieldsContainObjectReference(dyn.Fields);
+                default:
+                    return false;
+            }
         }
 
         public SaveEntity(string typePath, string rootObject, string instanceName) : base(typePath, rootObject, instanceName)
