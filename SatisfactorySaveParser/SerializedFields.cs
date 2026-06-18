@@ -20,7 +20,7 @@ namespace SatisfactorySaveParser
 
         public void Serialize(BinaryWriter writer, int buildVersion)
         {
-            if (ShouldBeNulled && Count == 0 && TrailingData.Length == 0)
+            if (ShouldBeNulled && Count == 0 && (TrailingData == null || TrailingData.Length == 0))
                 return;
 
             foreach (var field in this)

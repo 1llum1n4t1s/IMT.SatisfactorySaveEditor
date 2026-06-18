@@ -279,16 +279,48 @@ namespace SatisfactorySaveEditor.ViewModel
         /// <param name="model">The model to delete</param>
         private void Delete(SaveObjectModel model)
         {
-            // 3D 削除と同じ参照ガード（DeleteByEntity）を通す。1.0 raw V2 の参照保持アクター／コンポーネントを
-            // ツリーから削除すると、不透明な RawData が消えたノードを指したまま保存され孤児化するため。
-            if (model?.Model != null)
+            if (model == null) return;
+
+            // 実体（Model）を持つノードは 3D 削除と同じ参照ガード（DeleteByEntity）を通す。
+            if (model.Model != null)
             {
                 DeleteByEntity(model.Model);
                 return;
             }
-            // Model を持たない擬似ノード（名前のみのピンクノード）は従来通り単純除去。
+
+            // カテゴリ／フォルダ（名前のみのノード）は子孫を一括除去するため、子孫に削除拒否対象
+            //（参照保持アクター or raw V2 コンポーネント）が 1 つでも含まれるなら全体を拒否する。
+            // これを通さないと個別削除では拒否されるオブジェクトをフォルダ削除経由で prune でき、孤児化する。
+            if (SubtreeHasUndeletable(model))
+            {
+                MessageBox.Show(Resources.MsgDeleteRefUnsupported_Body, Resources.MsgDeleteRefUnsupported_Title,
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Model を持たない擬似ノードかつ子孫も全て削除可能なら従来通り単純除去。
             rootItem.Remove(model);
             OnPropertyChanged(nameof(RootItem));
+        }
+
+        /// <summary>raw V2（1.0 未パース）で削除すると round-trip 参照が孤児化するオブジェクトか。
+        /// 参照を持つアクター（コンポーネント／親／プロパティ参照）と、親から参照される raw V2 コンポーネントが該当。</summary>
+        private static bool IsUndeletableRawV2(SatisfactorySaveParser.SaveObject obj)
+        {
+            if (obj == null) return false;
+            if (obj is SatisfactorySaveParser.SaveEntity ent && ent.HasOutgoingReferences()) return true;
+            if (obj is SatisfactorySaveParser.SaveComponent && obj.DataFields == null && obj.RawData != null) return true;
+            return false;
+        }
+
+        /// <summary>ノードとその全子孫に、raw V2 で削除拒否すべきオブジェクトが 1 つでも含まれるか（フォルダ削除ガード用）。</summary>
+        private bool SubtreeHasUndeletable(SaveObjectModel node)
+        {
+            if (node == null) return false;
+            if (IsUndeletableRawV2(node.Model)) return true;
+            foreach (var child in node.Items)
+                if (SubtreeHasUndeletable(child)) return true;
+            return false;
         }
 
         /// <summary>
@@ -655,11 +687,8 @@ namespace SatisfactorySaveEditor.ViewModel
             // コンポーネント／親／参照を持つアクターを 3D 削除すると、TypePath で別グループに並ぶコンポーネントが
             // 存在しないアクターを指す OuterPathName で書き戻され孤児化する。完全な参照 prune は Stage3 まで未対応
             // なので、参照を持つアクターの削除は拒否する（複製ガードと対称）。
-            // 参照を持つアクター（コンポーネント／親／プロパティ参照）の削除は孤児化を生むため拒否（複製ガードと対称）。
-            // コンポーネント自体も親アクターの未パース RawData から参照されるため、raw V2 の間は単独削除も拒否する。
-            bool refersOut = target is SatisfactorySaveParser.SaveEntity refEnt && refEnt.HasOutgoingReferences();
-            bool rawComponent = target is SatisfactorySaveParser.SaveComponent && target.DataFields == null && target.RawData != null;
-            if (refersOut || rawComponent)
+            // raw V2（1.0 未パース）で削除すると round-trip 参照が孤児化するオブジェクトは拒否（複製ガードと対称）。
+            if (IsUndeletableRawV2(target))
             {
                 MessageBox.Show(Resources.MsgDeleteRefUnsupported_Body, Resources.MsgDeleteRefUnsupported_Title,
                     MessageBoxButton.OK, MessageBoxImage.Warning);
