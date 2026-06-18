@@ -138,7 +138,7 @@ namespace SatisfactorySaveEditor.Model
 
             CopyNameCommand = new RelayCommand(CopyName);
             CopyPathCommand = new RelayCommand(CopyPath);
-            AddPropertyCommand = new RelayCommand(AddProperty);
+            AddPropertyCommand = new RelayCommand(AddProperty, CanAddProperty);
             RemovePropertyCommand = new RelayCommand<SerializedPropertyViewModel>(RemoveProperty);
         }
 
@@ -288,8 +288,15 @@ namespace SatisfactorySaveEditor.Model
             return this.Model?.InstanceName?.Contains(filter, StringComparison.OrdinalIgnoreCase) ?? false;
         }
 
+        // raw V2（RawData 保持・DataFields==null）はプロパティ列が未パースのため、
+        // Add Property を許可すると追加プロパティが ApplyChanges でスキップされ保存に残らない。
+        // 編集可能（パース済み or レガシー＝DataFields 保持、または RawData 無し）に限り許可する。
+        private bool CanAddProperty() => Model != null && (Model.DataFields != null || Model.RawData == null);
+
         private void AddProperty()
         {
+            if (!CanAddProperty()) return;
+
             AddWindow window = new AddWindow
             {
                 Owner = Application.Current.MainWindow

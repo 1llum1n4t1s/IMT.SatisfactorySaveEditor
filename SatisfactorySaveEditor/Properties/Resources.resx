@@ -62,7 +62,7 @@
     <value>Not supported on 1.0+ saves</value>
   </data>
   <data name="MsgCheatUnsupportedV2_Body" xml:space="preserve">
-    <value>This cheat changes the collected-object list, which is not yet written back for 1.0+ (partitioned) saves — the change would be silently lost on save. It is disabled for this save format.</value>
+    <value>Cheats rely on parsed object properties, which 1.0+ (partitioned) saves do not expose yet — objects keep their raw bytes (DataFields is null). Running a cheat would dereference a missing field or silently lose the change, so cheats are disabled for this save format until V2 property editing lands.</value>
   </data>
   <data name="Msg3DNoSave_Body" xml:space="preserve">
     <value>Open a save file first to view it in 3D.</value>

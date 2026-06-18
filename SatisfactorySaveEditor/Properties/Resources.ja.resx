@@ -62,7 +62,7 @@
     <value>1.0以降のセーブでは未対応</value>
   </data>
   <data name="MsgCheatUnsupportedV2_Body" xml:space="preserve">
-    <value>このチートは収集オブジェクト一覧を変更しますが、1.0以降（パーティション）セーブではまだ書き戻しに対応しておらず、保存時に黙って失われます。このセーブ形式では無効です。</value>
+    <value>チートはパース済みのオブジェクトプロパティに依存しますが、1.0以降（パーティション）セーブではまだ展開されていません（オブジェクトは生バイトのまま・DataFields が null）。チートを実行すると存在しないフィールドを参照するか変更が黙って失われるため、V2 プロパティ編集に対応するまでこのセーブ形式では無効です。</value>
   </data>
   <data name="Msg3DNoSave_Body" xml:space="preserve">
     <value>先にセーブファイルを開いてください。</value>

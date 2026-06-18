@@ -176,6 +176,12 @@ namespace SatisfactorySaveParser.Save
             if (header.SaveVersion < FSaveCustomVersion.DROPPED_WireSpanFromConnnectionComponents || header.SaveVersion > FSaveCustomVersion.LatestVersion)
                 throw new UnknownBuildVersionException(header.SaveVersion);
 
+            // LatestVersion を 1.0 用に 60 へ引き上げたことで、partitioned でない（IsNewFormat==false）中間形式
+            // （Update 6/7/8）の SaveVersion も上の範囲を通過してしまう。それらは旧 LoadData/SaveData のレイアウト
+            // では正しく読めず破損するため、新形式でなければ legacy 上限（TrainBlueprintClassAdded＝U5）超えを弾く。
+            if (!header.IsNewFormat && header.SaveVersion > FSaveCustomVersion.TrainBlueprintClassAdded)
+                throw new UnknownBuildVersionException(header.SaveVersion);
+
             if (header.HeaderVersion >= SaveHeaderVersion.AddedSessionVisibility)
             {
                 header.SessionVisibility = (ESessionVisibility)reader.ReadByte();

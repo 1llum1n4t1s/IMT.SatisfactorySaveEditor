@@ -302,10 +302,10 @@ namespace SatisfactorySaveEditor.ViewModel
             
             log.Info($"Applying cheat {cheat.GetType().Name}");
 
-            // 1.0+ セーブでは CollectedObjects が V2 ボディに書き出されないため、スラグ系チートは
-            // 適用しても保存時に黙って失われる。「成功したのに反映されない」誤操作を避けるためブロックする。
-            if (saveGame?.Header != null && saveGame.Header.IsNewFormat
-                && (cheat is RemoveSlugsCheat || cheat is RestoreSlugsCheat))
+            // 1.0+ セーブでは全オブジェクトが RawData 保持（DataFields==null）でプロパティ未パースのため、
+            // スラグ系（CollectedObjects 未書き出し）もプロパティ系（FindField が null を返し NRE）も機能しない。
+            // V2 プロパティ対応（Stage3）まで 1.0 では全チートをブロックする。
+            if (saveGame?.Header != null && saveGame.Header.IsNewFormat)
             {
                 System.Windows.MessageBox.Show(
                     SatisfactorySaveEditor.Properties.Resources.MsgCheatUnsupportedV2_Body,
@@ -674,6 +674,10 @@ namespace SatisfactorySaveEditor.ViewModel
 
             var src = saveGame.Entries.OfType<SaveEntity>().FirstOrDefault(e => e.InstanceName == instanceName);
             if (src == null) return null;
+
+            // 3D ビューを開いている間にツリーから削除されたアクターは Entries に残るが live なツリーノードを失う。
+            // その状態で複製すると削除済みオブジェクトを復活させてしまうため、ツリーノードが残っている時だけ複製する。
+            if (rootItem.FindChild(instanceName, false) == null) return null;
 
             // P0 止血: 参照を持つアクターを複製するとクローンと原本が同一コンポーネント／親を共有してゲームロードで破損する。
             // 1.0+ の raw アクターは Components が未展開なので、RawData 先頭の data プレフィックス＋プロパティを読んで
